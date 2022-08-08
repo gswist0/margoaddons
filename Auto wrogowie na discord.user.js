@@ -76,8 +76,8 @@ function run() {
     document.querySelector(".game-window-positioner").appendChild(wrogowie);
 
     wrogowie.innerHTML = '<center>Link do webhooka:<br><br><input id="webhook_wrogowie" value="' + webhook + '">';
-    wrogowie.innerHTML = wrogowie.innerHTML + 'Nazwy klanów po przecinku:<br><br><input id="klany_wrogowie" value="' + klany_wrogowie + '">';
-    wrogowie.innerHTML = wrogowie.innerHTML + 'Nicki po przecinki:<br><br><input id="nicki_wrogowie" value="' + nicki_wrogowie + '">';
+    wrogowie.innerHTML = wrogowie.innerHTML + '<br><br>Nazwy klanów po przecinku:<br><br><input id="klany_wrogowie" value="' + klany_wrogowie + '">';
+    wrogowie.innerHTML = wrogowie.innerHTML + '<br><br>Nicki po przecinki:<br><br><input id="nicki_wrogowie" value="' + nicki_wrogowie + '">';
     wrogowie.innerHTML = wrogowie.innerHTML + '<br><br><center><button id="zapisz_wrogowie">Zapisz</button>'
 
     function saveWebhook() {
