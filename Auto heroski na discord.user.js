@@ -13,7 +13,7 @@
 
 function run(Engine) {
 
-    let alreadyCalled
+    let alreadyCalled = []
 
     //----ADDING WIDGET credit to https://github.com/nerthus-margonem/nerthusaddon
     const defaultPosition = [6, 'bottom-right-additional']
