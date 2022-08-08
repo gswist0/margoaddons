@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Auto heroski na discord
-// @version      1.3
+// @version      1.4
 // @match        https://virtus.margonem.pl/
 // @grant        none
 // @author       Bancewald
@@ -9,6 +9,7 @@
 //1.1 dodane tytany
 //1.2 message na co wola
 //1.3 naprawiony błąd powodujący że czasem wołacz nie działał
+//1.4 dodane opcje wyboru webhooka i pingów
 
 function run(Engine) {
 
