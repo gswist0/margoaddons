@@ -84,7 +84,7 @@ function run(Engine) {
 
 
     heroski.id = "heroski";
-    heroski.style.cssText = "position:absolute;top:200px;left:200px;width:200px;height:200px;background-color:white;z-index:999;display:none";
+    heroski.style.cssText = "position:absolute;top:200px;left:200px;width:200px;height:400px;background-color:white;z-index:999;display:none";
     document.querySelector(".game-window-positioner").appendChild(heroski);
 
     heroski.innerHTML = '<center>Link do webhooka:<br><br><input id="webhook_heroski" value="' + webhook + '">';
