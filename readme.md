@@ -11,9 +11,9 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 # lista aktualnych skryptów
 
--automatyczne wysylanie info o herosie na discord
+-automatyczne wysylanie info o herosie na discord - szczegolowa instrukcja nizej
 
--automatyczne wysylanie info o dropnietej legendzie na discord
+-automatyczne wysylanie info o dropnietej legendzie na discord - szczegolowa instrukcja nizej
 
 -dodawanie wszystkich osob z mapki do grupy pod K - przycisk mozna zmienic na dowolny z klawiatury w menu pod widgetem "K"
 
@@ -28,3 +28,25 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 -palenie wszystkiego - po kliknieciu przycisku pali wszystkie itemy z tytanow wakacje 2022 na ofudy - dostepne pod przyciskiem [ albo pod widgetem "O"
 
 -dobijanie wersja beta - poscig za wybranym graczem i dobijanie po walce - moga pojawiac sie bledy
+
+# skąd wziąć link do webhooka do discordowych dodatków
+
+trzeba mieć odpowiednie uprawnienia na serwerze discord
+1. ustawienia serwera
+2. integracje
+3. webhooki
+4. dodajemy nowy webhook do interesującego nas kanału lub kopiujemy adres istniejącego już webhooka
+
+# o co chodzi z specjalnymi pingami
+
+jeśli w dodatku automatycznego wysyłania info o herosie/tytanie na discord ustawimy specjalne pingi, to zamiast pingować here/everyone, dodatek spinguje wybraną rangę z naszego serwera discord, do tego potrzebne jest specjalne id rangi które wpisujemy w pole w opcjach
+
+id rangi można zdobyć tak
+1. włączyć tryb developera
+2. ustawienia serwera
+3. role
+4. PPM na interesującą nas rolę
+5. kopiuj id
+6. wklejamy id do pola w opcjach dodając do tego znaki <@ID>
+
+ostatecznie powinno wyglądać to np tak. <@902234476555813172>
