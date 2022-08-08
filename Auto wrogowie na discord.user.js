@@ -5,7 +5,7 @@
 // @match        *.margonem.pl/
 // ==/UserScript==
 
-function run(Engine) {
+function run() {
 
     //----ADDING WIDGET credit to https://github.com/nerthus-margonem/nerthusaddon
     const defaultPosition = [7, 'bottom-right-additional']
@@ -76,8 +76,8 @@ function run(Engine) {
     document.querySelector(".game-window-positioner").appendChild(wrogowie);
 
     wrogowie.innerHTML = '<center>Link do webhooka:<br><br><input id="webhook_wrogowie" value="' + webhook + '">';
-    wrogowie.innerHTML = 'Nazwy klanów po przecinku:<br><br><input id="klany_wrogowie" value="' + klany_wrogowie + '">';
-    wrogowie.innerHTML = 'Nicki po przecinki:<br><br><input id="nicki_wrogowie" value="' + nicki_wrogowie + '">';
+    wrogowie.innerHTML = wrogowie.innerHTML + 'Nazwy klanów po przecinku:<br><br><input id="klany_wrogowie" value="' + klany_wrogowie + '">';
+    wrogowie.innerHTML = wrogowie.innerHTML + 'Nicki po przecinki:<br><br><input id="nicki_wrogowie" value="' + nicki_wrogowie + '">';
     wrogowie.innerHTML = wrogowie.innerHTML + '<br><br><center><button id="zapisz_wrogowie">Zapisz</button>'
 
     function saveWebhook() {
@@ -119,4 +119,4 @@ function run(Engine) {
 
 }
 
-run(window.Engine)
+run()
