@@ -15,6 +15,8 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -automatyczne wysylanie info o dropnietej legendzie na discord - szczegolowa instrukcja nizej
 
+-automatyczne wysylanie info o wrogach na discord - szczegolowa instrukcja nizej
+
 -dodawanie wszystkich osob z mapki do grupy pod K - przycisk mozna zmienic na dowolny z klawiatury w menu pod widgetem "K"
 
 -autoleczenie z potek z priorytetem pelny lek > leczace %maxhp > normalne potki (nie marnują hp)
