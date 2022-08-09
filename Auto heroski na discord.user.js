@@ -81,6 +81,8 @@ function run(Engine) {
     var special_heros = localStorage.getItem('special_heros');
     if (localStorage.getItem('special_tytan') == null) localStorage.setItem('special_tytan', '');
     var special_tytan = localStorage.getItem('special_tytan');
+    if (localStorage.getItem('tytan_webhook') == null) localStorage.setItem('tytan_webhook', '');
+    var tytan_webhook = localStorage.getItem('tytan_webhook');
 
 
     heroski.id = "heroski";
@@ -92,6 +94,7 @@ function run(Engine) {
     heroski.innerHTML = heroski.innerHTML + '<br><br><input type="checkbox" id="ping_everyone_checkbox" name="ping_everyone_checkbox"><label for="ping_everyone_checkbox">Ping Everyone</label>'
     heroski.innerHTML = heroski.innerHTML + '<br><br>Specjalny ping dla herosów<input id="special_heros_input" value="' + special_heros + '">'
     heroski.innerHTML = heroski.innerHTML + '<br><br>Specjalny ping dla tytanów<input id="special_tytan_input" value="' + special_tytan + '">'
+    heroski.innerHTML = heroski.innerHTML + '<br><br>Osobny webhook dla tytanów<input id="tytan_webhook_input" value="' + tytan_webhook + '">'
     heroski.innerHTML = heroski.innerHTML + '<br><br><center><button id="zapisz_heroski">Zapisz</button>'
 
     function saveWebhook() {
@@ -100,11 +103,19 @@ function run(Engine) {
         let newEveryone = document.getElementById("ping_everyone_checkbox").checked
         let newSpecialHeros = document.getElementById("special_heros_input").value
         let newSpecialTytan = document.getElementById("special_tytan_input").value
+        let newtytanWebhook = document.getElementById("tytan_webhook_input").value
         localStorage.setItem('webhook_heroski', newWebhook)
         localStorage.setItem('ping_here', newHere)
         localStorage.setItem('ping_everyone', newEveryone)
         localStorage.setItem('special_heros', newSpecialHeros)
         localStorage.setItem('special_tytan', newSpecialTytan)
+        localStorage.setItem('tytan_webhook', newtytanWebhook)
+        webhook = newWebhook
+        ping_here = newHere
+        ping_everyone = newEveryone
+        special_heros = newSpecialHeros
+        special_tytan = newSpecialTytan
+        tytan_webhook = newtytanWebhook
     }
 
     document.getElementById("zapisz_heroski").addEventListener("click", saveWebhook)
@@ -122,7 +133,7 @@ function run(Engine) {
         else if (ping_everyone && ping_here) content_start = "@here @everyone"
         let color = 8388608
         const request = new XMLHttpRequest()
-        request.open('POST', webhook, true)
+        request.open('POST', (tytan_webhook != "" && istitan) ? tytan_webhook : webhook, true)
         request.setRequestHeader('Content-Type', 'application/json')
         request.send(JSON.stringify({
             content: `${content_start} Znalazłem ${text}!`,
