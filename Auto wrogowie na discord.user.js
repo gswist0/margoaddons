@@ -70,11 +70,6 @@ function run() {
     if (localStorage.getItem('nicki_wrogowie') == null) localStorage.setItem('nicki_wrogowie', '');
     var nicki_wrogowie = localStorage.getItem('nicki_wrogowie');
 
-    klany_array = klany_wrogowie.split(",")
-    klany_array.forEach(klan => klan.trim())
-    nicki_array = nicki_wrogowie.split(",")
-    nicki_array.forEach(nick => nick.trim())
-
 
     wrogowie.id = "wrogowie";
     wrogowie.style.cssText = "position:absolute;top:200px;left:200px;width:200px;height:400px;background-color:white;z-index:999;display:none";
@@ -92,10 +87,6 @@ function run() {
         localStorage.setItem('webhook_wrogowie', newWebhook)
         localStorage.setItem('klany_wrogowie', newKlany)
         localStorage.setItem('nicki_wrogowie', newNicki)
-        klany_array = klany_wrogowie.split(",")
-        klany_array.forEach(klan => klan.trim())
-        nicki_array = nicki_wrogowie.split(",")
-        nicki_array.forEach(nick => nick.trim())
     }
 
     document.getElementById("zapisz_wrogowie").addEventListener("click", saveWebhook)
