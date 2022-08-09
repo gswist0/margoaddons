@@ -97,6 +97,9 @@ function run(Engine) {
     heroski.innerHTML = heroski.innerHTML + '<br><br>Osobny webhook dla tytanów<input id="tytan_webhook_input" value="' + tytan_webhook + '">'
     heroski.innerHTML = heroski.innerHTML + '<br><br><center><button id="zapisz_heroski">Zapisz</button>'
 
+    document.getElementById("ping_here_checkbox").checked = ping_here
+    document.getElementById("ping_everyone_checkbox").checked = ping_everyone
+
     function saveWebhook() {
         let newWebhook = document.getElementById("webhook_heroski").value
         let newHere = document.getElementById("ping_here_checkbox").checked
