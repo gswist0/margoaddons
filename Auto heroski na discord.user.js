@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto heroski na discord
 // @version      1.4
-// @match        https://virtus.margonem.pl/
+// @match        *.margonem.pl/
 // @grant        none
 // @author       Bancewald
 // ==/UserScript==
