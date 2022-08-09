@@ -74,9 +74,9 @@ function run(Engine) {
     if (localStorage.getItem('webhook_heroski') == null) localStorage.setItem('webhook_heroski', '');
     var webhook = localStorage.getItem('webhook_heroski');
     if (localStorage.getItem('ping_here') == null) localStorage.setItem('ping_here', false);
-    var ping_here = localStorage.getItem('ping_here');
+    var ping_here = localStorage.getItem('ping_here') == "true" ? true : false;
     if (localStorage.getItem('ping_everyone') == null) localStorage.setItem('ping_everyone', false);
-    var ping_everyone = localStorage.getItem('ping_everyone');
+    var ping_everyone = localStorage.getItem('ping_everyone') == "true" ? true : false;
     if (localStorage.getItem('special_heros') == null) localStorage.setItem('special_heros', '');
     var special_heros = localStorage.getItem('special_heros');
     if (localStorage.getItem('special_tytan') == null) localStorage.setItem('special_tytan', '');
