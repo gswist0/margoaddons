@@ -52,3 +52,5 @@ id rangi można zdobyć tak
 6. wklejamy id do pola w opcjach dodając do tego znaki <@ID>
 
 ostatecznie powinno wyglądać to np tak. <@902234476555813172>
+
+dodatek do herosów ma opcję wpisania drugiego webhooka dla tytanów - wtedy herosy będą lecieć na normalny link, a tytani na ten dla tytanów
