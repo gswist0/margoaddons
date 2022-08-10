@@ -116,10 +116,6 @@ function run() {
         let playerY = goodPosition[1]
 
         if (!Engine.battle.show && state == 1) {
-            Engine.hero.autoGoTo({
-                x: playerX,
-                y: playerY
-            })
             let inBattleOrPvpProtected = false
             player.onSelfEmoList.forEach(emo => {
                 if (emo.name == "battle" || emo.name == "pvpprotected")
@@ -127,6 +123,10 @@ function run() {
             })
             if (!inBattleOrPvpProtected)
                 _g("fight&a=attack&id=" + player.d.id)
+            Engine.hero.autoGoTo({
+                x: playerX,
+                y: playerY
+            })
             setTimeout(() => chase(id), 50)
         } else {
             message("dogonilem")
