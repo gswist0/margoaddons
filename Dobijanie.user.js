@@ -74,7 +74,6 @@ function run() {
         let gateways = Engine.map.gateways.getList()
         let badSpot = false
         gateways.forEach(gateway => {
-            gatewayCoords.push([gateway.d.x,gateway.d.y])
             if(x == gateway.d.x && y == gateway.d.y) {
                 badSpot = true
             }
