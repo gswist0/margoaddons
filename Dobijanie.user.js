@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Dobijanie
-// @version      0.3
+// @version      0.4
 // @author       Bancewald
 // @match        *.margonem.pl/
 // ==/UserScript==
 
 //0.2 - fixed a bug when only last button on the list was interactable
 //0.3 - addon no longers attacks pvp protected players
+//0.4 - no longer passes through when waiting for protected enemy
 
 function run() {
 
@@ -69,10 +70,26 @@ function run() {
 
     //----
 
+    function getGoodPosition(x, y){
+        let gateways = Engine.map.gateways.getList()
+        let badSpot = false
+        gateways.forEach(gateway => {
+            if(x == gateway.d.x && y == gateway.d.y) {
+                badSpot = true
+            }
+        })
+        if(!badSpot){
+            return [x,y]
+        }
+        let places = [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(place => Engine.map.col.check(place[0],place[1]) == 0).sort((a,b) => {
+            return Math.hypot(Engine.hero.d.x - b[0], Engine.hero.d.y - b[1]) - Math.hypot(Engine.hero.d.x - a[0], Engine.hero.d.y - a[1])
+        })
+        return places[0]
+
+    }
+
     let state = 0
     let failures = 0
-
-
 
     function chase(id) {
         if (!Engine.others)
@@ -89,8 +106,9 @@ function run() {
                 return
             }
         }
-        let playerX = player.d.x
-        let playerY = player.d.y
+        let goodPosition = getGoodPosition(player.d.x, player.d.y)
+        let playerX = goodPosition[0]
+        let playerY = goodPosition[1]
 
         if (!Engine.battle.show && state == 1) {
             Engine.hero.autoGoTo({
