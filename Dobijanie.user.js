@@ -73,7 +73,6 @@ function run() {
     function getGoodPosition(x, y){
         let gateways = Engine.map.gateways.getList()
         let badSpot = false
-        let gatewayCoords = []
         gateways.forEach(gateway => {
             gatewayCoords.push([gateway.d.x,gateway.d.y])
             if(x == gateway.d.x && y == gateway.d.y) {
@@ -83,7 +82,7 @@ function run() {
         if(!badSpot){
             return [x,y]
         }
-        let places = [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(place => (Engine.map.col.check(place[0],place[1]) == 0 && !gatewayCoords.includes(place))).sort((a,b) => {
+        let places = [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(place => (Engine.map.col.check(place[0],place[1]) == 0 && Engine.map.gateways.getGtwAtPosition(place[0],place[1]) == undefined)).sort((a,b) => {
             return Math.hypot(Engine.hero.d.x - b[0], Engine.hero.d.y - b[1]) - Math.hypot(Engine.hero.d.x - a[0], Engine.hero.d.y - a[1])
         })
         return places[0]
