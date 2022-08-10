@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Dobijanie
-// @version      0.2
+// @version      0.3
 // @author       Bancewald
 // @match        *.margonem.pl/
 // ==/UserScript==
 
 //0.2 - fixed a bug when only last button on the list was interactable
+//0.3 - addon no longers attacks pvp protected players
 
 function run() {
 
@@ -95,12 +96,12 @@ function run() {
                 x: playerX,
                 y: playerY
             })
-            let inBattle = false
+            let inBattleOrPvpProtected = false
             player.onSelfEmoList.forEach(emo => {
-                if (emo.name == "battle")
-                    inBattle = true
+                if (emo.name == "battle" || emo.name == "pvpprotected")
+                    inBattleOrPvpProtected = true
             })
-            if (!inBattle)
+            if (!inBattleOrPvpProtected)
                 _g("fight&a=attack&id=" + player.d.id)
             setTimeout(() => chase(id), 50)
         } else {
