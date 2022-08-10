@@ -102,7 +102,7 @@ function run() {
         let player = Engine.others.getById(id)
         if (player == undefined) {
             failures += 1
-            if (failures < 100) {
+            if (failures < 200) {
                 setTimeout(() => chase(id), 100)
                 return
             } else {
@@ -130,6 +130,7 @@ function run() {
             setTimeout(() => chase(id), 50)
         } else {
             message("dogonilem")
+            failures = 0
             state = 0
         }
     }
