@@ -80,9 +80,10 @@ function run() {
         let player = Engine.others.getById(id)
         if (player == undefined) {
             failures += 1
-            if (failures < 100)
+            if (failures < 100) {
                 setTimeout(() => chase(id), 100)
-            else {
+                return
+            } else {
                 message("przestaje gonic")
                 state = 0
                 return
