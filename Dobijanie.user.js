@@ -70,7 +70,7 @@ function run() {
 
     //----
 
-    function getGoodPosition(x, y){
+    function getGoodPosition(x, y, emotions){
         let gateways = Engine.map.gateways.getList()
         let badSpot = false
         gateways.forEach(gateway => {
@@ -78,7 +78,12 @@ function run() {
                 badSpot = true
             }
         })
-        if(!badSpot){
+        let inBattleOrPvpProtected = false
+        emotions.forEach(emo => {
+            if (emo.name == "battle" || emo.name == "pvpprotected")
+                inBattleOrPvpProtected = true
+        })
+        if(!badSpot && !inBattleOrPvpProtected){
             return [x,y]
         }
         let places = [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(place => (Engine.map.col.check(place[0],place[1]) == 0 && Engine.map.gateways.getGtwAtPosition(place[0],place[1]) == undefined)).sort((a,b) => {
@@ -106,7 +111,7 @@ function run() {
                 return
             }
         }
-        let goodPosition = getGoodPosition(player.d.x, player.d.y)
+        let goodPosition = getGoodPosition(player.d.x, player.d.y, player.onSelfEmoList)
         let playerX = goodPosition[0]
         let playerY = goodPosition[1]
 
