@@ -87,7 +87,7 @@ function run() {
             return [x,y]
         }
         let places = [[x-1,y],[x+1,y],[x,y-1],[x,y+1]].filter(place => (Engine.map.col.check(place[0],place[1]) == 0 && Engine.map.gateways.getGtwAtPosition(place[0],place[1]) == undefined)).sort((a,b) => {
-            return Math.hypot(Engine.hero.d.x - b[0], Engine.hero.d.y - b[1]) - Math.hypot(Engine.hero.d.x - a[0], Engine.hero.d.y - a[1])
+            return Math.hypot(Engine.hero.d.x - a[0], Engine.hero.d.y - a[1]) - Math.hypot(Engine.hero.d.x - b[0], Engine.hero.d.y - b[1])
         })
         return places[0]
 
