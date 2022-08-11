@@ -20,29 +20,34 @@ function run(){
                 x: Engine.hero.d.x,
                 y: Engine.hero.d.y + 1
             })
-            return
-        }
+        } else return
+        Engine.hero.onSelfEmoList.forEach(emo => {
+            if(emo.name == "stasis") isAfk = true
+        })
         if(isAfk){
             Engine.hero.autoGoTo({
                 x: Engine.hero.d.x,
                 y: Engine.hero.d.y - 1
             })
-            return
-        }
+        } else return
+        Engine.hero.onSelfEmoList.forEach(emo => {
+            if(emo.name == "stasis") isAfk = true
+        })
         if(isAfk){
             Engine.hero.autoGoTo({
                 x: Engine.hero.d.x + 1,
                 y: Engine.hero.d.y
             })
-            return
-        }
+        } else return
+        Engine.hero.onSelfEmoList.forEach(emo => {
+            if(emo.name == "stasis") isAfk = true
+        })
         if(isAfk){
             Engine.hero.autoGoTo({
                 x: Engine.hero.d.x - 1,
                 y: Engine.hero.d.y
             })
-            return
-        }
+        } else return
     },1000)
 }
 
