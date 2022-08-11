@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name         Antyduszek
-// @version      1.0
+// @version      1.1
 // @author       Bancewald
 // @match        *.margonem.pl/
 // ==/UserScript==
 
+//1.1 nie probuje ruszac sie gdy aktywna jest captcha
 
 function run(){
     setInterval(() => {
+        if(Engine.captcha.wnd != undefined)
+            return
         let isAfk = false
         Engine.hero.onSelfEmoList.forEach(emo => {
             if(emo.name == "stasis") isAfk = true
