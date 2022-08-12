@@ -13,7 +13,7 @@
 
     const updateHeroHp = (item) => {
         if(item._cachedStats.hasOwnProperty("leczy")){
-            Engine.hero.hp += item._cachedStats.leczy
+            Engine.hero.d.hp += item._cachedStats.leczy
         }
         else if(item._cachedStats.hasOwnProperty("fullheal")){
             if(item._cachedStats.fullheal >= Engine.hero.d.maxhp - Engine.hero.d.hp){
@@ -23,7 +23,7 @@
             }
         }
         else if(item._cachedStats.hasOwnProperty("perheal")){
-            Engine.hero.hp += (item._cachedStats.perheal/100)*Engine.hero.maxhp
+            Engine.hero.d.hp += (item._cachedStats.perheal/100)*Engine.hero.d.maxhp
         }
     }
 
@@ -83,7 +83,7 @@
                 .filter(item => !item._cachedStats.hasOwnProperty("timelimit") || (item._cachedStats.hasOwnProperty("timelimit") && !item._cachedStats.timelimit.includes(",")));
 
             let item;
-            if (items.length > 0) getMaxHealVal(items);
+            if (items.length > 0) item = getMaxHealVal(items);
             else if (items_percent.length > 0) item = getMaxHealValperheal(items_percent);
             else if (items_fh.length > 0) item = getMaxHealValFH(items_fh);
 
