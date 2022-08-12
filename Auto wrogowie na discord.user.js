@@ -98,8 +98,8 @@ function run() {
         request.open('POST', webhook, true)
         request.setRequestHeader('Content-Type', 'application/json')
         request.send(JSON.stringify({
-            content: `${Engine.hero.nick}(${Engine.hero.d.lvl}lvl) widzi SZMATE`,
-            username: 'Potężny szmaciarz',
+            content: `${Engine.hero.nick}(${Engine.hero.d.lvl}lvl) widzi wroga`,
+            username: 'Potężny informator',
             avatar_url: `https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Achtung.svg/220px-Achtung.svg.png`,
             embeds: [{
                 color: color,
