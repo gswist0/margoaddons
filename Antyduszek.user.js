@@ -48,7 +48,7 @@ function run(){
                 y: Engine.hero.d.y
             })
         } else return
-    },1000)
+    },5000)
 }
 
 run()
