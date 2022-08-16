@@ -11,6 +11,13 @@
 
 function run() {
 
+    function isCloseEnough(playerX, playerY, heroX, heroY){
+        let distance = Math.sqrt(Math.pow(heroX - playerX, 2) + Math.pow(heroY - playerY, 2))
+        if(distance <= 2)
+            return true
+        return false
+    }
+
     var gonitwa = document.createElement("div")
     gonitwa.id = "gonitwa"
     gonitwa.style.cssText = "position:absolute;bottom:110px;right:10px;width:150px;height:250px;background-color:white;z-index:999;display:block;overflow-y:scroll;text-align:center";
@@ -121,8 +128,10 @@ function run() {
                 if (emo.name == "battle" || emo.name == "pvpprotected")
                     inBattleOrPvpProtected = true
             })
-            if (!inBattleOrPvpProtected)
+            if (!inBattleOrPvpProtected && isCloseEnough(playerX, playerY, Engine.hero.x, Engine.hero.y)){
+                console.log("sending attack request")
                 _g("fight&a=attack&id=" + player.d.id)
+            }
             Engine.hero.autoGoTo({
                 x: playerX,
                 y: playerY
