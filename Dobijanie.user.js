@@ -13,7 +13,7 @@ function run() {
 
     function isCloseEnough(playerX, playerY, heroX, heroY){
         let distance = Math.sqrt(Math.pow(heroX - playerX, 2) + Math.pow(heroY - playerY, 2))
-        if(distance <= 2)
+        if(distance < 2)
             return true
         return false
     }
@@ -128,7 +128,7 @@ function run() {
                 if (emo.name == "battle" || emo.name == "pvpprotected")
                     inBattleOrPvpProtected = true
             })
-            if (!inBattleOrPvpProtected && isCloseEnough(playerX, playerY, Engine.hero.x, Engine.hero.y)){
+            if (!inBattleOrPvpProtected && isCloseEnough(playerX, playerY, Engine.hero.d.x, Engine.hero.d.y)){
                 console.log("sending attack request")
                 _g("fight&a=attack&id=" + player.d.id)
             }
