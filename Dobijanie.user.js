@@ -13,7 +13,7 @@ function run() {
 
     var gonitwa = document.createElement("div")
     gonitwa.id = "gonitwa"
-    gonitwa.style.cssText = "position:absolute;bottom:150px;right:0px;width:100px;height:300px;background-color:white;z-index:999;display:block;overflow-y:scroll;text-align:center";
+    gonitwa.style.cssText = "position:absolute;bottom:110px;right:10px;width:150px;height:250px;background-color:white;z-index:999;display:block;overflow-y:scroll;text-align:center";
     document.querySelector(".game-window-positioner").appendChild(gonitwa);
 
     const changeGonitwaState = function() {
