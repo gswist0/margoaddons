@@ -9,22 +9,22 @@
 //1.1 - dodane potki ktore lecza % hp
 //1.2 - naprawiono zapętlenia
 
-(Engine => {
+function run() {
 
     const updateHeroHp = (item) => {
         if(item._cachedStats.hasOwnProperty("leczy")){
-            Engine.hero.d.hp = (parseInt(Engine.hero.d.hp) + item._cachedStats.leczy).toString()
+            Engine.hero.d.hp = Engine.hero.d.hp + parseInt(item._cachedStats.leczy)
         }
         else if(item._cachedStats.hasOwnProperty("fullheal")){
             if(item._cachedStats.fullheal >= Engine.hero.d.maxhp - Engine.hero.d.hp){
                 Engine.hero.d.hp = Engine.hero.d.maxhp
             } else {
-                Engine.hero.d.hp = (parseInt(Engine.hero.d.hp) + item._cachedStats.fullheal).toString()
+                Engine.hero.d.hp = Engine.hero.d.hp + parseInt(item._cachedStats.fullheal)
             }
         }
         else if(item._cachedStats.hasOwnProperty("perheal")){
-            Engine.hero.d.hp = (parseInt(Engine.hero.d.hp) + (item._cachedStats.perheal/100)*Engine.hero.d.maxhp).toString()
-        }
+            Engine.hero.d.hp = Engine.hero.d.hp + parseInt((item._cachedStats.perheal/100)*Engine.hero.d.maxhp)
+    }
     }
 
     const useItem = item => {
@@ -103,4 +103,6 @@
     }
 
     window.API.addCallbackToEvent("close_battle", autoHeal);
-})(window.Engine)
+}
+
+run()
