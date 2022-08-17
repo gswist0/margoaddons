@@ -13,17 +13,17 @@
 
     const updateHeroHp = (item) => {
         if(item._cachedStats.hasOwnProperty("leczy")){
-            Engine.hero.d.hp += item._cachedStats.leczy
+            Engine.hero.d.hp = (parseInt(Engine.hero.d.hp) + item._cachedStats.leczy).toString()
         }
         else if(item._cachedStats.hasOwnProperty("fullheal")){
             if(item._cachedStats.fullheal >= Engine.hero.d.maxhp - Engine.hero.d.hp){
                 Engine.hero.d.hp = Engine.hero.d.maxhp
             } else {
-                Engine.hero.d.hp += item._cachedStats.fullheal
+                Engine.hero.d.hp = (parseInt(Engine.hero.d.hp) + item._cachedStats.fullheal).toString()
             }
         }
         else if(item._cachedStats.hasOwnProperty("perheal")){
-            Engine.hero.d.hp += (item._cachedStats.perheal/100)*Engine.hero.d.maxhp
+            Engine.hero.d.hp = (parseInt(Engine.hero.d.hp) + (item._cachedStats.perheal/100)*Engine.hero.d.maxhp).toString()
         }
     }
 
@@ -57,11 +57,20 @@
     }
 
     const autoHeal = () => {
-        const {
+        let {
             hp,
             maxhp,
             lvl
         } = Engine.hero.d;
+
+        if (hp == undefined) {
+            hp = Engine.hero.d.warrior_stats.hp
+            Engine.hero.d.hp = hp
+        }
+        if (maxhp == undefined){
+            maxhp = Engine.hero.d.warrior_stats.maxhp
+            Engine.hero.d.maxhp = maxhp
+        }
 
         if (hp < maxhp && !Engine.dead) {
             const items = Engine.items.fetchLocationItems("g")
