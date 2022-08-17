@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         AutoHeal z potek i fullheal
-// @version      1.2
+// @version      1.3
 // @match        *.margonem.pl/
 // @grant        none
 // @author       Bancewald
@@ -8,6 +8,7 @@
 
 //1.1 - dodane potki ktore lecza % hp
 //1.2 - naprawiono zapętlenia
+//1.3 - zuzywa teraz potki pelnego leczenia po kolei
 
 function run() {
 
@@ -83,7 +84,14 @@ function run() {
             const items_fh = Engine.items.fetchLocationItems("g")
                 .filter(item => item._cachedStats.hasOwnProperty("fullheal"))
                 .filter(item => !item._cachedStats.hasOwnProperty("lvl") || (item._cachedStats.hasOwnProperty("lvl") && item._cachedStats.lvl <= lvl))
-                .filter(item => !item._cachedStats.hasOwnProperty("timelimit") || (item._cachedStats.hasOwnProperty("timelimit") && !item._cachedStats.timelimit.includes(",")));
+                .filter(item => !item._cachedStats.hasOwnProperty("timelimit") || (item._cachedStats.hasOwnProperty("timelimit") && !item._cachedStats.timelimit.includes(",")))
+                .sort((a, b) => {
+                    let aHeal = parseInt(a._cachedStats.fullheal)
+                    let bHeal = parseInt(b._cachedStats.fullheal)
+                    if(aHeal == bHeal) return 0
+                    else if(aHeal < bHeal) return -1
+                    else return 1
+                });
 
             const items_percent = Engine.items.fetchLocationItems("g")
                 .filter(item => item._cachedStats.hasOwnProperty("perheal"))
