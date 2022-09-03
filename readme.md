@@ -25,7 +25,7 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -wykrywacz sakiwek (tych z smoczej alchemii)
 
--palenie wszystkiego - po kliknieciu przycisku pali wszystkie itemy z tytanow wakacje 2022 na ofudy - dostepne pod przyciskiem [ albo pod widgetem "O"
+-palenie wszystkiego - po kliknieciu przycisku pali wszystkie itemy z tytanow wakacje 2022 na ofudy - dostepne pod przyciskiem [ albo pod widgetem "O" (aktualne usunięty przez brak przydatności po evencie)
 
 -dobijanie wersja beta - poscig za wybranym graczem i dobijanie po walce - moga pojawiac sie bledy
 
