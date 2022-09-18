@@ -164,7 +164,21 @@ function run() {
 
         Engine.others.getDrawableList().filter(other => other.isPlayer).forEach(other => {
             let button = document.createElement("button")
-            button.innerHTML = other.d.nick
+            let color = "grey"
+            switch(other.d.relation){
+                case "fr" : color = "green"
+                    break;
+                case "cl" : color = "green"
+                    break;
+                case "cl-fr" : color = "yellow"
+                    break;
+                case "en" : color = "red"
+                    break;
+                case "cl-en" : color = "orange"
+                    break;
+            }
+            button.style = `border:1px solid black;background:${color};width:133px;padding:5px 0 5px 0;cursor:pointer;`
+            button.innerHTML = other.d.nick + "(" + other.d.lvl + other.d.prof + ")"
             button.classList.add(other.d.id)
                 /*button.addEventListener("click", () => {
                     if(state == 0){
