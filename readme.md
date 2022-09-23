@@ -31,7 +31,7 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -dobijanie wersja beta - poscig za wybranym graczem i dobijanie po walce - moga pojawiac sie bledy
 
--antyduszek
+-antyduszek - obecnie wylaczony przez konflikty z antybotem
 
 # skąd wziąć link do webhooka do discordowych dodatków
 
