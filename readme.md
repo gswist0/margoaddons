@@ -6,8 +6,8 @@ kontakt na discord: Potężny Dominator#5260
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć Zainstaluj
-w przypadku dodatków wysyłających coś na discord należy dodatkowo zastąpić kwadratowy nawias linkiem do webhooka
 
+w razie bledow/propozycji pisac
 najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, lub discord Potężny Dominator#5260
 
 
@@ -21,7 +21,7 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -dodawanie wszystkich osob z mapki do grupy pod K - przycisk mozna zmienic na dowolny z klawiatury w menu pod widgetem "K"
 
--autoleczenie z potek z priorytetem pelny lek > leczace %maxhp > normalne potki (nie marnują hp)
+-autoleczenie z potek z priorytetem pelny lek < leczace %maxhp < normalne potki (nie marnują hp)
 
 -uciekanie po walce - ustawienia pod przyciskiem ";" , wlaczamy/wylaczamy uciekanie pod przyciskiem "'" (na prawo) - menu dostepne tez pod widgetem "S"
 
