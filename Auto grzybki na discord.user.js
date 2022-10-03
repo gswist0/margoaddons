@@ -128,7 +128,7 @@ function run(Engine) {
 
     if (Engine && Engine.npcs && Engine.npcs.check) window.API.addCallbackToEvent("newNpc", function(npc) {
         if(grzybki_nazwy.includes(npc.d.nick) && !alreadyCalled.includes(npc.d.id)){
-            sendDiscordAlert(npc.d.nick, npc.d.lvl, Engine.map.d.name, Engine.hero.d.x, Engine.hero.d.y, npc.d.icon, npc.d.killSeconds)
+            sendDiscordAlert(npc.d.nick, npc.d.lvl, Engine.map.d.name, npc.d.x, npc.d.y, npc.d.icon, npc.d.killSeconds)
             alreadyCalled.push(npc.d.id)
             message(`Wołam na ${npc.d.nick}`)
         }
