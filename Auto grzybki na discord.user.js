@@ -118,7 +118,7 @@ function run(Engine) {
             avatar_url: `https://micc.garmory-cdn.cloud/obrazki/npc/${icon}`,
             embeds: [{
                 color: color,
-                title: `${hero_nick} (${hero_level}lvl) znalazł ${text} ${nick} (${lvl}) na mapie ${map} (${x},${y}), pozostało ${Math.floor(time/60)} minut ${time - Math.floor(time/60)}!`,
+                title: `${hero_nick} (${hero_level}lvl) znalazł grzyba ${nick} (${lvl}) na mapie ${map} (${x},${y}), pozostało ${Math.floor(time/60)} minut ${time - (Math.floor(time/60)*60)} sekund!`,
                 timestamp: new Date().toISOString()
             }]
         }))
@@ -130,6 +130,7 @@ function run(Engine) {
         if(grzybki_nazwy.includes(npc.d.nick) && !alreadyCalled.includes(npc.d.id)){
             sendDiscordAlert(npc.d.nick, npc.d.lvl, Engine.map.d.name, Engine.hero.d.x, Engine.hero.d.y, npc.d.icon, npc.d.killSeconds)
             alreadyCalled.push(npc.d.id)
+            message(`Wołam na ${npc.d.nick}`)
         }
     })
     else setTimeout(function() { run(window.Engine) }, 100)
