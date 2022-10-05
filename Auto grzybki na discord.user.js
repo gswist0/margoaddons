@@ -72,7 +72,6 @@ function run(Engine) {
     var ping_here = localStorage.getItem('ping_here') == "true" ? true : false;
     if (localStorage.getItem('ping_everyone') == null) localStorage.setItem('ping_everyone', false);
     var ping_everyone = localStorage.getItem('ping_everyone') == "true" ? true : false;
-    if (localStorage.getItem('special_heros') == null) localStorage.setItem('special_heros', '');
 
     grzybki.id = "grzybki";
     grzybki.style.cssText = "position:absolute;top:200px;left:200px;width:200px;height:400px;background-color:white;z-index:999;display:none";
