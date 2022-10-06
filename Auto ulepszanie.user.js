@@ -112,7 +112,12 @@ function run(){
         setInterval(()=>{
             for (const item of Engine.items.fetchLocationItems("g")){
                 if(lootCache.includes(item.id)){
-                    let itemToUpgradeId = Engine.items.fetchLocationItems("g").filter(item => item.name === itemToUpgrade && !item._cachedStats.hasOwnProperty("binds"))[0].id;
+                    let itemToUpgradeObject = Engine.items.fetchLocationItems("g").filter(item => item.name === itemToUpgrade && !item._cachedStats.hasOwnProperty("binds"))[0]
+                    if(itemtoUpgradeObject.cl > 14){
+                        message("wrong item")
+                        return
+                    }
+                    let itemToUpgradeId = itemtoUpgradeObject.id;
                     _g(`enhancement&action=progress&item=${itemToUpgradeId}&ingredients=${item.id}`);
                     lootCache = lootCache.filter(id => id !== item.id);
                 }
@@ -124,7 +129,7 @@ function run(){
                 let items = Engine.items.fetchLocationItems("k")
                 items = items.concat(Engine.items.fetchLocationItems("l"))
                 for (const item of items) {
-                    if (!lootCache.includes(item.id) && item._cachedStats.rarity !== "legendary" && !(item._cachedStats.rarity === "unique" && unikaty === false) && !(item._cachedStats.rarity === "heroic" && herka === false)) {
+                    if (!lootCache.includes(item.id) && item._cachedStats.rarity !== "legendary" && !(item._cachedStats.rarity === "unique" && unikaty === false) && !(item._cachedStats.rarity === "heroic" && herka === false) && item.cl < 15) {
                         lootCache.push(item.id);
                     }
                 }
