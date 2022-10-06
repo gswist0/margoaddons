@@ -113,11 +113,11 @@ function run(){
             for (const item of Engine.items.fetchLocationItems("g")){
                 if(lootCache.includes(item.id)){
                     let itemToUpgradeObject = Engine.items.fetchLocationItems("g").filter(item => item.name === itemToUpgrade && !item._cachedStats.hasOwnProperty("binds"))[0]
-                    if(itemtoUpgradeObject.cl > 14){
+                    if(itemToUpgradeObject.cl > 14){
                         message("wrong item")
                         return
                     }
-                    let itemToUpgradeId = itemtoUpgradeObject.id;
+                    let itemToUpgradeId = itemToUpgradeObject.id;
                     _g(`enhancement&action=progress&item=${itemToUpgradeId}&ingredients=${item.id}`);
                     lootCache = lootCache.filter(id => id !== item.id);
                 }
