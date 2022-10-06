@@ -124,7 +124,7 @@ function run(){
                 let items = Engine.items.fetchLocationItems("k")
                 items = items.concat(Engine.items.fetchLocationItems("l"))
                 for (const item of items) {
-                    if (!lootCache.includes(item.id) && !item._cachedStats.rarity === "legendary" && !(item._cachedStats.rarity === "unique" && unikaty === false) && !(item._cachedStats.rarity === "heroic" && herka === false)) {
+                    if (!lootCache.includes(item.id) && item._cachedStats.rarity !== "legendary" && !(item._cachedStats.rarity === "unique" && unikaty === false) && !(item._cachedStats.rarity === "heroic" && herka === false)) {
                         lootCache.push(item.id);
                     }
                 }
