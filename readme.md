@@ -35,6 +35,8 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -auto ulepszanie - wpisujesz nazwe itemku i ci go ulepsza samo, domyslnie tylko zwyklakami ale w opcjach mozna zaznaczyc tez unikaty i hera
 
+-lootfilter - moje ustawienia - łapie wszystkie itemy którymi da sie ulepszac, wszystkie teleporty, runy, potki z pelnym leczeniem, serce z marloth i pazur mlodego smoka, odrzuca resztę konsumpcyjnych, strzaly, neutralne, talizmany ; jak ktoś w miarę ogarnia to można sobie pozmieniać funkcję USERLOGIC
+
 # skąd wziąć link do webhooka do discordowych dodatków
 
 trzeba mieć odpowiednie uprawnienia na serwerze discord
