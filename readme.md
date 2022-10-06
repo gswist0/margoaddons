@@ -33,6 +33,8 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -antyduszek - obecnie wylaczony przez konflikty z antybotem
 
+-auto ulepszanie - wpisujesz nazwe itemku i ci go ulepsza samo, domyslnie tylko zwyklakami ale w opcjach mozna zaznaczyc tez unikaty i hera
+
 # skąd wziąć link do webhooka do discordowych dodatków
 
 trzeba mieć odpowiednie uprawnienia na serwerze discord
