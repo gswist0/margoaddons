@@ -68,10 +68,10 @@ function run(Engine) {
 
     if (localStorage.getItem('webhook_grzybki') == null) localStorage.setItem('webhook_grzybki', '');
     var webhook = localStorage.getItem('webhook_grzybki');
-    if (localStorage.getItem('ping_here') == null) localStorage.setItem('ping_here', false);
-    var ping_here = localStorage.getItem('ping_here') == "true" ? true : false;
-    if (localStorage.getItem('ping_everyone') == null) localStorage.setItem('ping_everyone', false);
-    var ping_everyone = localStorage.getItem('ping_everyone') == "true" ? true : false;
+    if (localStorage.getItem('ping_hereg') == null) localStorage.setItem('ping_hereg', false);
+    var ping_here = localStorage.getItem('ping_hereg') == "true" ? true : false;
+    if (localStorage.getItem('ping_everyoneg') == null) localStorage.setItem('ping_everyoneg', false);
+    var ping_everyone = localStorage.getItem('ping_everyoneg') == "true" ? true : false;
 
     grzybki.id = "grzybki";
     grzybki.style.cssText = "position:absolute;top:200px;left:200px;width:200px;height:400px;background-color:white;z-index:999;display:none";
@@ -90,8 +90,8 @@ function run(Engine) {
         let newHere = document.getElementById("ping_here_checkbox").checked
         let newEveryone = document.getElementById("ping_everyone_checkbox").checked
         localStorage.setItem('webhook_grzybki', newWebhook)
-        localStorage.setItem('ping_here', newHere)
-        localStorage.setItem('ping_everyone', newEveryone)
+        localStorage.setItem('ping_hereg', newHere)
+        localStorage.setItem('ping_everyoneg', newEveryone)
         webhook = newWebhook
         ping_here = newHere
         ping_everyone = newEveryone
