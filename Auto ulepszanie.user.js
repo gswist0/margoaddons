@@ -130,7 +130,7 @@ function run(){
                 items = items.concat(Engine.items.fetchLocationItems("l"))
                 for (const item of items) {
                     let itemToUpgradeObject = Engine.items.fetchLocationItems("g").filter(item => item.name === itemToUpgrade && !item._cachedStats.hasOwnProperty("binds"))[0]
-                    if(itemToUpgradeObject._cachedStats.rarity == item._cachedStats.target_rarity){
+                    if (itemToUpgradeObject._cachedStats.rarity == item._cachedStats.target_rarity && !lootCache.includes(item.id)){
                         lootCache.push(item.id)
                     }
                     if (!lootCache.includes(item.id) && item._cachedStats.rarity !== "legendary" && !(item._cachedStats.rarity === "unique" && unikaty === false) && !(item._cachedStats.rarity === "heroic" && herka === false) && item.cl < 15) {
