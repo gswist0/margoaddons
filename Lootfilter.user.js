@@ -38,7 +38,7 @@ run()
 
 
 function USERLOGIC(item){
-    if(item._cachedStats.hasOwnProperty("teleport") || item._cachedStats.hasOwnProperty("runes") || item._cachedStats.hasOwnProperty("fullheal") || item.name == "Serce pajęczego ołtarza" || item.name == "Pazur młodego smoka") return 'want'
+    if(item._cachedStats.hasOwnProperty("teleport") || item._cachedStats.hasOwnProperty("runes") || item._cachedStats.hasOwnProperty("fullheal") || item._cachedStats.hasOwnProperty("canpreview") || item.name == "Serce pajęczego ołtarza" || item.name == "Pazur młodego smoka") return 'want'
     else if(item.cl===16 || item.cl===21 || item.cl===22 || item.cl===15) return 'not'
     else return null
 }
