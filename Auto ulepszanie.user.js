@@ -113,7 +113,7 @@ function run(){
             for (const item of Engine.items.fetchLocationItems("g")){
                 if(lootCache.includes(item.id)){
                     let itemToUpgradeObject = Engine.items.fetchLocationItems("g").filter(item => item.name === itemToUpgrade && !item._cachedStats.hasOwnProperty("binds"))[0]
-                    if(itemToUpgradeObject.cl > 14){
+                    if(itemToUpgradeObject == undefined || itemToUpgradeObject.cl > 14){
                         message("wrong item")
                         return
                     }
