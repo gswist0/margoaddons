@@ -31,7 +31,7 @@ function run(Engine) {
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.heroski {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/heroski.png");' +
+        'background-image: url("https://iili.io/ppgpAx.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'

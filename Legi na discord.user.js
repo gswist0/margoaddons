@@ -31,7 +31,7 @@ function run(Engine) {
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.legi {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/legi.png");' +
+        'background-image: url("https://iili.io/pprdMP.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'

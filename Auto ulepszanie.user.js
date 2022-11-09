@@ -30,7 +30,7 @@ function run(){
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.ulepszanie {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/ulepszanie.png");' +
+        'background-image: url("https://iili.io/pprfSa.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'

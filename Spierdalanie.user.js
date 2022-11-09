@@ -26,7 +26,7 @@
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.spierdalanie {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/spierdalanie.png");' +
+        'background-image: url("https://iili.io/pprKcg.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'

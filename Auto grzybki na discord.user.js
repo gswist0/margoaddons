@@ -26,7 +26,7 @@ function run(Engine) {
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.grzybki {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/grzybki.png");' +
+        'background-image: url("https://iili.io/ppgywQ.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'

@@ -44,7 +44,7 @@ function run() {
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.gonitwa {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/dobijanie.png");' +
+        'background-image: url("https://freeimage.host/i/ppr9tV");' +
         'background-position: 0;' +
         '}' +
         '</style>'

@@ -23,7 +23,7 @@ function run() {
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.wrogowie {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/wrogowie.png");' +
+        'background-image: url("https://iili.io/pprBHJ.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'

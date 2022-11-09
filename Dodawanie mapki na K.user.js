@@ -29,7 +29,7 @@
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.dodawanie {' +
-        'background-image: url("https://bancewald.000webhostapp.com/scripts/dodawanie.png");' +
+        'background-image: url("https://iili.io/pprJoB.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'
