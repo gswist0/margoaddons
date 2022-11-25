@@ -2,7 +2,7 @@
 
 wszystkie dodatki są przeznaczone na nowy interfejs i nie będą działać na starym
 
-kontakt na discord: Potężny Dominator#5260
+kontakt na discord: Potężny Dominator#2137
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć Zainstaluj
