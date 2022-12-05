@@ -8,7 +8,7 @@ do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć Zainstaluj
 
 w razie bledow/propozycji pisac
-najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, lub discord Potężny Dominator#5260
+najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, lub discord Potężny Dominator#2137
 
 
 # lista aktualnych skryptów
