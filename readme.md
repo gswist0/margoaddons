@@ -37,6 +37,8 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -lootfilter - moje ustawienia - łapie wszystkie itemy którymi da sie ulepszac, wszystkie teleporty, runy, potki z pelnym leczeniem, serce z marloth i pazur mlodego smoka, odrzuca resztę konsumpcyjnych, strzaly, neutralne, talizmany ; jak ktoś w miarę ogarnia to można sobie pozmieniać funkcję USERLOGIC
 
+-oddaj d, po napisaniu przez kogos "oddaj d" na czacie grupowym, oddaje mu d
+
 # skąd wziąć link do webhooka do discordowych dodatków
 
 trzeba mieć odpowiednie uprawnienia na serwerze discord
