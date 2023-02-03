@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Auto ulepszanie
-// @version      1.0
+// @version      1.1
 // @match        *.margonem.pl/
 // @grant        none
 // @author       Bancewald
 // ==/UserScript==
+
+//1.1 added counter
 
 
 function run(){
@@ -77,6 +79,11 @@ function run(){
     var unikaty = localStorage.getItem('unikaty_' + Engine.hero.d.id) == "true" ? true : false;
     if (localStorage.getItem('herka_' + Engine.hero.d.id) == null) localStorage.setItem('herka_' + Engine.hero.d.id, false);
     var herka = localStorage.getItem('herka_' + Engine.hero.d.id) == "true" ? true : false;
+    if (localStorage.getItem("dzisiaj") == null) localStorage.setItem("dzisiaj", 0);
+    var dzisiaj = localStorage.getItem("dzisiaj");
+    if (localStorage.getItem("kiedy") == null) localStorage.setItem("kiedy", Date.now());
+    var kiedy = new Date(parseInt(localStorage.getItem("kiedy")));
+
 
     ulepszanie.id = "ulepszanie";
     ulepszanie.style.cssText = "position:absolute;top:200px;left:200px;width:200px;height:400px;background-color:white;z-index:999;display:none";
@@ -86,6 +93,7 @@ function run(){
     ulepszanie.innerHTML = '<center>Nazwa itemu do ulepszania:<br><br><input id="item_ulepszanie" value="' + itemToUpgrade + '">';
     ulepszanie.innerHTML = ulepszanie.innerHTML + '<br><br><input type="checkbox" id="unikaty" name="unikaty"><label for="unikaty">Ulepszac unikatami</label>'
     ulepszanie.innerHTML = ulepszanie.innerHTML + '<br><br><input type="checkbox" id="herka" name="herka"><label for="herka">Ulepszac herkami</label>'
+    ulepszanie.innerHTML = ulepszanie.innerHTML + '<br><br><center><div id = "dzisiaj">' + dzisiaj + '</div>'
     ulepszanie.innerHTML = ulepszanie.innerHTML + '<br><br><center><button id="zapisz_ulepszanie">Zapisz</button>'
 
     document.getElementById("unikaty").checked = unikaty
@@ -118,7 +126,21 @@ function run(){
                         return
                     }
                     let itemToUpgradeId = itemToUpgradeObject.id;
-                    _g(`enhancement&action=progress&item=${itemToUpgradeId}&ingredients=${item.id}`);
+                    let dataTeraz = new Date();
+                    if(dataTeraz.getFullYear() === kiedy.getFullYear() && dataTeraz.getMonth() === kiedy.getMonth() && dataTeraz.getDate() === kiedy.getDate()){
+                        dzisiaj++;
+                        document.getElementById("dzisiaj").innerHTML = dzisiaj;
+                        localStorage.setItem("dzisiaj", dzisiaj)
+                        localStorage.setItem("kiedy", Date.now())
+                    }else{
+                        dzisiaj = 0;
+                        kiedy = dataTeraz;
+                        document.getElementById("dzisiaj").innerHTML = dzisiaj;
+                        localStorage.setItem("dzisiaj", dzisiaj)
+                        localStorage.setItem("kiedy", Date.now())
+                    }
+                    if(dzisiaj <= 2000)
+                        _g(`enhancement&action=progress&item=${itemToUpgradeId}&ingredients=${item.id}`);
                     lootCache = lootCache.filter(id => id !== item.id);
                 }
             }
