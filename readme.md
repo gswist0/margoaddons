@@ -1,5 +1,7 @@
 # Zestaw dodatków do nowego interfejsu gry Margonem
 
+POD KONIEC 2022 DODATKI PRZESTAŁY BYC WSPIERANE I NIE BĘDĄ DOSTAWAC AKTUALIZACJI DO ODWOŁANIA 
+
 wszystkie dodatki są przeznaczone na nowy interfejs i nie będą działać na starym
 
 kontakt na discord: Potężny Dominator#2137
