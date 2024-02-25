@@ -133,7 +133,7 @@
             var list = Engine.others.getDrawableList()
             for (let i = 0; i < list.length; i++) {
                 if (list[i].isPlayer) {
-                    if ((list[i].d.relation == "fr" || list[i].d.relation == "cl" || list[i].d.relation == "cl-fr" || applicable_distance(list[i].d.x, list[i].d.y)) && !is_he_in_party(list[i].d.id) && !is_chat_focused())
+                    if ((list[i].d.relation == 2 || list[i].d.relation == 4 || list[i].d.relation == 5 || applicable_distance(list[i].d.x, list[i].d.y)) && !is_he_in_party(list[i].d.id) && !is_chat_focused())
                         _g("party&a=inv&id=" + list[i].d.id)
                 }
             }
