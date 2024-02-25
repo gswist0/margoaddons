@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Dobijanie
-// @version      0.4
+// @version      0.5
 // @author       Bancewald
 // @match        *.margonem.pl/
 // ==/UserScript==
@@ -8,7 +8,7 @@
 //0.2 - fixed a bug when only last button on the list was interactable
 //0.3 - addon no longers attacks pvp protected players
 //0.4 - no longer passes through when waiting for protected enemy
-
+//0.5 - bugfix
 function run() {
 
     function isCloseEnough(playerX, playerY, heroX, heroY){
@@ -20,7 +20,7 @@ function run() {
 
     var gonitwa = document.createElement("div")
     gonitwa.id = "gonitwa"
-    gonitwa.style.cssText = "position:absolute;bottom:110px;right:10px;width:150px;height:250px;background-color:white;z-index:999;display:block;overflow-y:scroll;text-align:center";
+    gonitwa.style.cssText = "position:absolute;bottom:110px;right:10px;width:150px;height:250px;background-color:white;z-index:999;display:none;overflow-y:scroll;text-align:center";
     document.querySelector(".game-window-positioner").appendChild(gonitwa);
 
     const changeGonitwaState = function() {
@@ -44,7 +44,7 @@ function run() {
 
     $('head').append('<style>' +
         '.main-buttons-container .widget-button .icon.gonitwa {' +
-        'background-image: url("https://freeimage.host/i/ppr9tV");' +
+        'background-image: url("https://i.imgur.com/d5XtVNv.png");' +
         'background-position: 0;' +
         '}' +
         '</style>'
@@ -158,6 +158,15 @@ function run() {
         }
     })
 
+    document.addEventListener('keyup', (e) => {
+        if(e.which == 27){
+            state = 0
+        }
+    }
+    )
+
+	
+
 
     function refeshOthersList() {
         gonitwa.innerHTML = ""
@@ -165,33 +174,32 @@ function run() {
         Engine.others.getDrawableList().filter(other => other.isPlayer).forEach(other => {
             let button = document.createElement("button")
             let color = "grey"
+	        let cancel = false
             switch(other.d.relation){
-                case "fr" : color = "green"
+                case 2:  
+		            color = "green"
+		            cancel = true
                     break;
-                case "cl" : color = "green"
+                case 4 : 
+                    color = "green"
+	                cancel = true
                     break;
-                case "cl-fr" : color = "yellow"
+                case 5 :  
+                    color = "yellow"
+                    cancel = true
                     break;
-                case "en" : color = "red"
+                case 3 : color = "red" 
                     break;
-                case "cl-en" : color = "orange"
+                case 6 : color = "orange"
                     break;
             }
+	    if (!cancel){
             button.style = `border:1px solid black;background:${color};width:133px;padding:5px 0 5px 0;cursor:pointer;`
             button.innerHTML = other.d.nick + "(" + other.d.lvl + other.d.prof + ")"
             button.classList.add(other.d.id)
-                /*button.addEventListener("click", () => {
-                    if(state == 0){
-                        message("gonię " + other.d.nick)
-                        state = 1
-                        chase(other.d.id)
-                    }else{
-                        state = 0
-                        message("przestaje gonic")
-                    }
-                })*/
             gonitwa.appendChild(button)
             gonitwa.innerHTML += "<br>"
+            }
 
         })
     }
