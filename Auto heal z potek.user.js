@@ -2,6 +2,7 @@
 // @name         AutoHeal z potek i fullheal
 // @version      1.3
 // @match        *.margonem.pl/
+// @match        *.margonem.com/
 // @grant        none
 // @author       Bancewald
 // ==/UserScript==
