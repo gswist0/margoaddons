@@ -3,6 +3,7 @@
 // @version      0.5
 // @author       Bancewald
 // @match        *.margonem.pl/
+// @match        *.margonem.com/
 // ==/UserScript==
 
 //0.2 - fixed a bug when only last button on the list was interactable
@@ -118,7 +119,7 @@ function run() {
                 return
             }
         }
-        let goodPosition = getGoodPosition(player.d.x, player.d.y, player.onSelfEmoList)
+        let goodPosition = getGoodPosition(player.d.x, player.d.y, player.getOnSelfEmoList())
         let playerX = goodPosition[0]
         let playerY = goodPosition[1]
 
