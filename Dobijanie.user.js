@@ -125,7 +125,7 @@ function run() {
 
         if (!Engine.battle.show && state == 1) {
             let inBattleOrPvpProtected = false
-            player.onSelfEmoList.forEach(emo => {
+            player.getOnSelfEmoList().forEach(emo => {
                 if (emo.name == "battle" || emo.name == "pvpprotected")
                     inBattleOrPvpProtected = true
             })
