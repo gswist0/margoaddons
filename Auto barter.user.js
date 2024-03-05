@@ -3,6 +3,7 @@
 // @version      1.0
 // @author       Bancewald
 // @match        *.margonem.pl
+// @match        *.margonem.com
 // ==/UserScript==
 
 
