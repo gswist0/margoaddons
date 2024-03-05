@@ -1,7 +1,5 @@
 # Zestaw dodatków do nowego interfejsu gry Margonem
 
-POD KONIEC 2022 DODATKI PRZESTAŁY BYC WSPIERANE I NIE BĘDĄ DOSTAWAC AKTUALIZACJI DO ODWOŁANIA 
-
 wszystkie dodatki są przeznaczone na nowy interfejs i nie będą działać na starym
 
 kontakt na discord: Potężny Dominator#2137
@@ -29,17 +27,7 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -wykrywacz sakiwek (tych z smoczej alchemii)
 
--palenie wszystkiego - po kliknieciu przycisku pali wszystkie itemy z tytanow wakacje 2022 na ofudy - dostepne pod przyciskiem [ albo pod widgetem "O" (aktualne usunięty przez brak przydatności po evencie)
-
--dobijanie wersja beta - poscig za wybranym graczem i dobijanie po walce - moga pojawiac sie bledy
-
--antyduszek - obecnie wylaczony przez konflikty z antybotem
-
--auto ulepszanie - wpisujesz nazwe itemku i ci go ulepsza samo, domyslnie tylko zwyklakami ale w opcjach mozna zaznaczyc tez unikaty i hera
-
--lootfilter - moje ustawienia - łapie wszystkie itemy którymi da sie ulepszac, wszystkie teleporty, runy, potki z pelnym leczeniem, serce z marloth i pazur mlodego smoka, odrzuca resztę konsumpcyjnych, strzaly, neutralne, talizmany ; jak ktoś w miarę ogarnia to można sobie pozmieniać funkcję USERLOGIC
-
--oddaj d, po napisaniu przez kogos "oddaj d" na czacie grupowym, oddaje mu d
+-auto barter - automatyczne zamienianie wszystkich neutrali na itemki jednym kliknieciem (np z agara)
 
 # skąd wziąć link do webhooka do discordowych dodatków
 
