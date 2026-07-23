@@ -106,7 +106,7 @@
     }
 
     function is_chat_focused() {
-        if (document.activeElement.tagName == "INPUT" || document.activeElement.tagname == "TEXTAREA") {
+        if (document.activeElement.tagName == "INPUT" || document.activeElement.tagname == "TEXTAREA" || document.activeElement.tagname == "MAGIC_INPUT") {
             return true
         }
         return false
