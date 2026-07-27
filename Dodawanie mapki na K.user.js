@@ -118,11 +118,17 @@
         return true;
     }
 
+    function am_i_leader(){
+        let members = Engine.party.getMembers()
+        let myId = Engine.hero.getId()
+        return members.get(myId).leader;
+    }
+
     function is_he_in_party(id) {
         if (!Engine.party)
             return false
-        if (Engine.party.getLeaderId() != Engine.hero.d.id)
-            return true
+        if (am_i_leader())
+            return false
         for (let i = 0; i < Object.keys(Engine.party.getMembers()).length; i++) {
             if (Object.keys(Engine.party.getMembers())[i] == id) return true
         }
