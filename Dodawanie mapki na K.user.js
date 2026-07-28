@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         dodawanie mapki na K
-// @version      1.3
+// @version      1.4
 // @author       Bancewald
 // @match        *.margonem.pl/
 // @match        *.margonem.com/
@@ -10,6 +10,7 @@
 //1.1 nie zaprasza już przypadkiem podczas pisania na czacie
 //1.2 lekka optymalizacja
 //1.3 dodane menu wyboru przycisku
+//1.4 fixy 2026
 
 (Engine => {
 
@@ -127,10 +128,11 @@
     function is_he_in_party(id) {
         if (!Engine.party)
             return false
-        if (am_i_leader())
-            return false
-        for (let i = 0; i < Object.keys(Engine.party.getMembers()).length; i++) {
-            if (Object.keys(Engine.party.getMembers())[i] == id) return true
+        if (!am_i_leader())
+            return true
+        let members = Engine.party.getMembers().keys().toArray()
+        for (let i = 0; i < members.length; i++) {
+            if (members[i] == id) return true
         }
         return false
     }
