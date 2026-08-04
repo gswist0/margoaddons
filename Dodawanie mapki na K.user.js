@@ -126,7 +126,7 @@
     }
 
     function is_he_in_party(id) {
-        if (!Engine.party)
+        if (!Engine.party || Engine.party.getMembers() == undefined)
             return false
         if (!am_i_leader())
             return true
