@@ -12,7 +12,12 @@
 //1.3 dodane menu wyboru przycisku
 //1.4 fixy 2026
 
-(Engine => {
+function execute (Engine) {
+
+    if(!Engine.widgetManager || !Engine.widgetManager.addWidgetButtons){
+        setTimeout(execute, 50, window.Engine);
+        return;
+    }
 
 
     //----ADDING WIDGET credit to https://github.com/nerthus-margonem/nerthusaddon
@@ -150,4 +155,6 @@
     }
 
     document.addEventListener('keydown', add_to_group)
-})(window.Engine)
+}
+
+execute(window.Engine)
