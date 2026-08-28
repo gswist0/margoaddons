@@ -28,7 +28,7 @@ function execute () {
     }
 
     $('head').append('<style>' +
-        '.main-buttons-container .widget-button .icon.wrogowie {' +
+        '.main-buttons-container .widget-button .icon.wrogowiedc {' +
         'background-image: url("https://iili.io/pprBHJ.png");' +
         'background-position: 0;' +
         '}' +
