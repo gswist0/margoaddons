@@ -5,7 +5,12 @@
 // @match        *.margonem.pl/
 // ==/UserScript==
 
-function run() {
+function execute (Engine) {
+
+    if(!Engine.widgetManager || !Engine.widgetManager.addWidgetButtons){
+        setTimeout(execute, 50, window.Engine);
+        return;
+    }
 
     //----ADDING WIDGET credit to https://github.com/nerthus-margonem/nerthusaddon
     const defaultPosition = [7, 'bottom-right-additional']
@@ -119,4 +124,4 @@ function run() {
 
 }
 
-run()
+execute(window.Engine)
