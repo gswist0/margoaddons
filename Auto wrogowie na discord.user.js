@@ -117,7 +117,13 @@ function execute () {
 
 
     if (Engine && Engine.others && Engine.others.check) API.addCallbackToEvent("newOther", function(other) {
-        if (!other.d.clan) {} else if (klany_wrogowie.includes(other.d.clan.name) || nicki_wrogowie.includes(other.d.nick)) {
+        if (Engine.map.d.pvp == 0){
+            return;
+        }
+        if (nicki_wrogowie.includes(other.d.nick)){
+            sendDiscordAlert(other)
+        }
+        if (!other.d.clan) {} else if (klany_wrogowie.includes(other.d.clan.name)) {
             sendDiscordAlert(other)
         }
     })
