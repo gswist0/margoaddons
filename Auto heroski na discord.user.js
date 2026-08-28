@@ -21,7 +21,7 @@ function execute () {
     let alreadyCalled = []
 
     //----ADDING WIDGET credit to https://github.com/nerthus-margonem/nerthusaddon
-    const defaultPosition = [6, 'bottom-right-additional']
+    const defaultPosition = [3, 'bottom-right-additional']
 
     const addWidgetToDefaultWidgetSet = function() {
         Engine.widgetManager.addKeyToDefaultWidgetSet(
