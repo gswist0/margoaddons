@@ -5,22 +5,23 @@
 // @match        *.margonem.pl/
 // ==/UserScript==
 
-function execute (Engine) {
+function execute () {
 
-    if(!Engine.widgetManager || !Engine.widgetManager.addWidgetButtons){
-        setTimeout(execute, 50, window.Engine);
+
+    if(!(Engine && Engine.widgetManager && Engine.widgetManager.addWidgetButtons)){
+        setTimeout(execute, 50);
         return;
     }
 
     //----ADDING WIDGET credit to https://github.com/nerthus-margonem/nerthusaddon
-    const defaultPosition = [7, 'bottom-right-additional']
+    const defaultPosition = [2, 'bottom-right-additional']
 
     const addWidgetToDefaultWidgetSet = function() {
         Engine.widgetManager.addKeyToDefaultWidgetSet(
-            'wrogowie',
+            'wrogowiedc',
             defaultPosition[0],
             defaultPosition[1],
-            'wrogowie',
+            'wrogowiedc',
             'green',
             changewrogowieState
         )
@@ -48,13 +49,13 @@ function execute (Engine) {
     }
 
     function createButtonNI() {
-        if (Engine.interfaceStart && Object.keys(Engine.widgetManager.getDefaultWidgetSet()).includes('wrogowie')) {
+        if (Engine.interfaceStart && Object.keys(Engine.widgetManager.getDefaultWidgetSet()).includes('wrogowiedc')) {
             let wrogowiePos = defaultPosition
 
             const serverStoragePos = Engine.serverStorage.get(Engine.widgetManager.getPathToHotWidgetVersion())
-            if (serverStoragePos && serverStoragePos.wrogowie) wrogowiePos = serverStoragePos.wrogowie
+            if (serverStoragePos && serverStoragePos.wrogowiedc) wrogowiePos = serverStoragePos.wrogowiedc
 
-            Engine.widgetManager.createOneWidget('wrogowie', { wrogowie: wrogowiePos }, true, [])
+            Engine.widgetManager.createOneWidget('wrogowiedc', { wrogowiedc: wrogowiePos }, true, [])
             Engine.widgetManager.setEnableDraggingButtonsWidget(false)
         } else setTimeout(createButtonNI, 500)
     }
@@ -120,8 +121,8 @@ function execute (Engine) {
             sendDiscordAlert(other)
         }
     })
-    else setTimeout(function() { execute(window.Engine) }, 100)
+    else setTimeout(function() { execute() }, 100)
 
 }
 
-execute(window.Engine)
+execute()
