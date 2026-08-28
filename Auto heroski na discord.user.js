@@ -10,8 +10,13 @@
 //1.2 message na co wola
 //1.3 naprawiony błąd powodujący że czasem wołacz nie działał
 //1.4 dodane opcje wyboru webhooka i pingów
+function execute () {
 
-function run(Engine) {
+
+    if(!(Engine && Engine.widgetManager && Engine.widgetManager.addWidgetButtons)){
+        setTimeout(execute, 50);
+        return;
+    }
 
     let alreadyCalled = []
 
@@ -165,7 +170,7 @@ function run(Engine) {
             alreadyCalled.push(npc.d.nick)
         }
     })
-    else setTimeout(function() { run(window.Engine) }, 100)
+    else setTimeout(function() { execute() }, 100)
 }
 
-run(window.Engine)
+execute()
