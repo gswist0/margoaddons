@@ -120,7 +120,7 @@ function execute (Engine) {
             sendDiscordAlert(other)
         }
     })
-    else setTimeout(function() { run(window.Engine) }, 100)
+    else setTimeout(function() { execute(window.Engine) }, 100)
 
 }
 
