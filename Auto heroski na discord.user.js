@@ -156,15 +156,7 @@ function execute () {
     }
 
     if (Engine && Engine.npcs && Engine.npcs.check) window.API.addCallbackToEvent("newNpc", function(npc) {
-        if (npc.d.wt > 79 && !alreadyCalled.includes(npc.d.nick)) {
-            var tip = npc.tip[0];
-            if (tip.indexOf("tytan") != -1) {
-                message("Wołam na " + npc.d.nick);
-                sendDiscordAlert(npc.d.nick, npc.d.lvl, Engine.map.d.name, npc.d.x, npc.d.y, npc.d.icon, true);
-                alreadyCalled.push(npc.d.nick)
-            }
-        }
-        if (((npc.d.wt > 79 && npc.d.wt <= 99) || npc.d.nick == "Tropiciel Herosów" || npc.d.nick == "Wtajemniczony Tropiciel Herosów" || npc.d.nick == "Doświadczony Tropiciel Herosów") && !alreadyCalled.includes(npc.d.nick)) {
+        if ((npc.getKind() == "tytan" || npc.getKind() == "heros" || npc.d.nick == "Tropiciel Herosów" || npc.d.nick == "Wtajemniczony Tropiciel Herosów" || npc.d.nick == "Doświadczony Tropiciel Herosów") && !alreadyCalled.includes(npc.d.nick)) {
             message("Wołam na " + npc.d.nick);
             sendDiscordAlert(npc.d.nick, npc.d.lvl, Engine.map.d.name, npc.d.x, npc.d.y, npc.d.icon, false);
             alreadyCalled.push(npc.d.nick)
