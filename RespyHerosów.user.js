@@ -57,8 +57,9 @@
                     lvl: safe(() => r.getLvl()),
                     icon: safe(() => r.getIcon()),
                     frames: safe(() => r.getFrameAmount()) || 1,
+                    kind: safe(() => r.getKind())
                 }))
-                .filter(r => Number.isFinite(r.rx) && Number.isFinite(r.ry));
+                .filter(r => Number.isFinite(r.rx) && Number.isFinite(r.ry) && r.kind == 0);
         }
 
         function getImage(icon) {
