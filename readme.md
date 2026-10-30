@@ -5,10 +5,15 @@ wszystkie dodatki są przeznaczone na nowy interfejs i nie będą działać na s
 część dodatków korzysta z wbudowanej w nowy interfejs opcji widgetów, i ich ikonki powinny pojawiać się domyślnie w prawym dolnym rogu ekranu. po pojawieniu się ich tam, można przenieść je w dowolne miejsce w interfejsie i zmiana powinna zostać zapamiętana
 
 gdyby jednak były z tym problemy, każdy dodatek ma też alternatywny sposób uruchomienia menu/funkcjonalności poprzez skrót klawiszowy:
+
 herosy na discord - alt + H
+
 grzybki na discord - alt + G
+
 wrogowie na discord - alt + J
+
 legi na discord - alt + L
+
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć Zainstaluj
