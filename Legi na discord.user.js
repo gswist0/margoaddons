@@ -127,6 +127,12 @@ function run(Engine) {
         }, 100)
     } else setTimeout(function() { run(window.Engine) }, 100)
 
+    document.addEventListener("keydown", function (event) {
+    if (event.altKey && event.key.toLowerCase() === "l") {
+        event.preventDefault();
+        changeLegiState();
+    }
+});
 
 }
 

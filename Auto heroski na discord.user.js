@@ -163,6 +163,13 @@ function execute () {
         }
     })
     else setTimeout(function() { execute() }, 100)
+
+    document.addEventListener("keydown", function (event) {
+    if (event.altKey && event.key.toLowerCase() === "h") {
+        event.preventDefault();
+        changeHeroskiState();
+    }
+});
 }
 
 execute()

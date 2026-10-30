@@ -2,20 +2,20 @@
 
 wszystkie dodatki są przeznaczone na nowy interfejs i nie będą działać na starym
 
-PRZEZ DŁUGĄ PRZERWĘ OD GRY WIĘKSZOŚĆ DODATKÓW PRZESTAŁA DZIAŁAĆ, BĘDĘ JE POWOLI NAPRAWIAĆ W MIARE POTRZEB
-DODATKI KTÓRĘ DZIAŁAJĄ TERAZ
--DODAWANIE DO GRP
--AUTO HEROSKI
--AUTO WROGOWIE
+część dodatków korzysta z wbudowanej w nowy interfejs opcji widgetów, i ich ikonki powinny pojawiać się domyślnie w prawym dolnym rogu ekranu. po pojawieniu się ich tam, można przenieść je w dowolne miejsce w interfejsie i zmiana powinna zostać zapamiętana
 
-kontakt na discord: poteznydominator
+gdyby jednak były z tym problemy, każdy dodatek ma też alternatywny sposób uruchomienia menu/funkcjonalności poprzez skrót klawiszowy:
+herosy na discord - alt + H
+grzybki na discord - alt + G
+wrogowie na discord - alt + J
+legi na discord - alt + L
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć Zainstaluj
 
 w razie bledow/propozycji pisac
-najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, lub discord Potężny Dominator#2137
 
+kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA PO PROSTU NAPISAC
 
 # lista aktualnych skryptów
 
@@ -25,15 +25,11 @@ najlepiej kontaktować się poprzez pocztę w margonem na nerthus postać Banc, 
 
 -automatyczne wysylanie info o wrogach na discord - szczegolowa instrukcja nizej
 
--dodawanie wszystkich osob z mapki do grupy pod K - przycisk mozna zmienic na dowolny z klawiatury w menu pod widgetem "K"
+-automatyczne wysyłanie info o grzybkach na discord - szczegolowa instrukcja nizej
 
--autoleczenie z potek z priorytetem pelny lek < leczace %maxhp < normalne potki (nie marnują hp)
+-automatyczne oddawanie D w grupie osobie która napisze "oddaj d" na czacie grupowym
 
--uciekanie po walce - ustawienia pod przyciskiem ";" , wlaczamy/wylaczamy uciekanie pod przyciskiem "'" (na prawo) - menu dostepne tez pod widgetem "S"
-
--wykrywacz sakiwek (tych z smoczej alchemii)
-
--auto barter - automatyczne zamienianie wszystkich neutrali na itemki jednym kliknieciem (np z agara)
+-pokazywanie respów herosów (dane brane bezpośrednio z gry) na mapie, wraz z dokładnym zasięgiem skąd ich widać.
 
 # skąd wziąć link do webhooka do discordowych dodatków
 

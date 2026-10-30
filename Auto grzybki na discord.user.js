@@ -133,6 +133,13 @@ function run(Engine) {
         }
     })
     else setTimeout(function() { run(window.Engine) }, 100)
+
+    document.addEventListener("keydown", function (event) {
+    if (event.altKey && event.key.toLowerCase() === "g") {
+        event.preventDefault();
+        changegrzybkiState();
+    }
+});
 }
 
 run(window.Engine)

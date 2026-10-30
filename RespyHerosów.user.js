@@ -5,6 +5,7 @@
 // @description  Pokazuje (tylko u Ciebie) herosa na jego respach, rysując na własnym canvasie nad grą
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
+// @author       Bancewald 
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
