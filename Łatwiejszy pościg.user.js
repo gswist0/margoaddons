@@ -6,6 +6,7 @@
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
 // @run-at       document-idle
+// @author       Bancewald
 // @grant        none
 // ==/UserScript==
 
