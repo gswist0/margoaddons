@@ -31,6 +31,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 
 -pokazywanie respów herosów (dane brane bezpośrednio z gry) na mapie, wraz z dokładnym zasięgiem skąd ich widać.
 
+-łatwiejszy pościg. zamiast klikać na kogoś prawy i wybierać w okienku kontekstowym "atakuj" wystarczy trzymając crtl nacisnąć prawy i efekt będzie ten sam. nie jest to autodobijarka i  nie chodzi za nas - korzysta z funkcji pościgu dostępnej w grze na NI
+
 # skąd wziąć link do webhooka do discordowych dodatków
 
 trzeba mieć odpowiednie uprawnienia na serwerze discord
