@@ -18,7 +18,7 @@
   window.__koKlanowiczeOnline = true;
 
   /* ================== USTAWIENIA ================== */
-  const REFRESH_MS = 30 * 1000;   // co ile odświeżać listę
+  const REFRESH_MS = 5 * 1000;    // co ile odświeżać listę
   const DEBUG = false;            // true = surowy rekord w stopce + logi w konsoli (F12)
 
   // Odpowiedź serwera (clan&a=members -> members) to PŁASKA lista:
@@ -129,7 +129,7 @@
     .ko-btn:hover{background:#5d4c2a}
     .ko-btn.on{background:#7a6639}
     #ko-win,#ko-win *{box-sizing:border-box}
-    #ko-body{max-height:320px;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
+    #ko-body{overscroll-behavior:contain;max-height:320px;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
     #ko-body table{width:100%;table-layout:auto;border-collapse:collapse;margin:0}
     #ko-body th,#ko-body td{display:table-cell;position:static;float:none;height:auto;
       padding:3px 6px;margin:0;text-align:left;vertical-align:middle;
@@ -213,6 +213,14 @@
       applyHeight(0);
       save({ width: 300, height: 0 });
     });
+
+    // kółko myszy przewija listę (a nie zoom/mapę gry)
+    win.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? body.clientHeight : 1;
+      body.scrollTop += e.deltaY * k;
+    }, { passive: false });
 
     // przeciąganie
     let drag = null;
@@ -303,6 +311,13 @@
   const RELOG_RE = /logoff|logout|relog|change_?char|change_?player|switch_?char/i;
   const PAUSE_MS = 90 * 1000; // bezpiecznik: wznowienie, gdyby 'logoff&a=stop' nigdy nie nadszedł
 
+  // nick własnej postaci – wykluczamy ją z listy
+  const myNick = () => {
+    const h = window.Engine && Engine.hero;
+    const n = h && ((h.d && h.d.nick) || h.nick);
+    return n ? String(n) : '';
+  };
+
   const gameReady = () => !!(window.Engine && Engine.allInit && Engine.hero);
   const isPaused = () => Date.now() < state.pausedUntil || !gameReady();
 
@@ -364,7 +379,8 @@
       busy = true;
       try {
         const { flat, reason } = await fetchMembers();
-        state.members = flat ? parseMembers(flat) : null;
+        const me = myNick();
+        state.members = flat ? parseMembers(flat).filter((m) => !me || m.nick !== me) : null;
         state.reason = reason;
         render(ui);
       } finally {
