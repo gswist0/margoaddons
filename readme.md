@@ -14,9 +14,11 @@ wrogowie na discord - alt + J
 
 legi na discord - alt + L
 
+auto barter - alt + B
+
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
-aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć Zainstaluj
+aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć "raw" (w pracym górnym rogu). jeśli mamy Tampermonkey, powinno automatycznie otworzyć się okno instalacji skryptu
 
 w razie bledow/propozycji pisac
 
@@ -37,6 +39,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 -pokazywanie respów herosów (dane brane bezpośrednio z gry) na mapie, wraz z dokładnym zasięgiem skąd ich widać.
 
 -łatwiejszy pościg. zamiast klikać na kogoś prawy i wybierać w okienku kontekstowym "atakuj" wystarczy trzymając crtl nacisnąć prawy i efekt będzie ten sam. nie jest to autodobijarka i  nie chodzi za nas - korzysta z funkcji pościgu dostępnej w grze na NI
+
+-auto barter, po klinięciu alt+b z otwartym oknem barteru, wykonuje po kolei wszystkie dostępne możliwe receptury. użyteczne np. w wymianie itemków z agara, czy wakacyjnej wymianie uni/her na rebitki kolosów. NIE POLECAM UZYWAC W SYTUACJACH GDY Z TYCH SAMYCH ITEMÓW MOŻNA TWORZYĆ RÓŻNE RZECZY, NP BARTER Z KOPALNI, CZY WYMIANA HEROSOWYCH SKRZYNEK
 
 # skąd wziąć link do webhooka do discordowych dodatków
 
@@ -61,3 +65,8 @@ id rangi można zdobyć tak
 ostatecznie powinno wyglądać to np tak. <@902234476555813172>
 
 dodatek do herosów ma opcję wpisania drugiego webhooka dla tytanów - wtedy herosy będą lecieć na normalny link, a tytani na ten dla tytanów
+
+# mniej lub bardziej ważne
+z dodatków korzystacie na własną odpowiedzialność. raczej nie ma w nich nic co mogłoby być uznane za nielegalne, sa to głównie funkcje QoL, lub do komunikacji z discordem, ale wiadomo że z margonem nigdy nie wiadomo.
+dodatki są i zawsze będą darmowe.
+zezwalam na kopiowanie części / całości kodu dodatków na własne potrzeby / do własnych skryptów
