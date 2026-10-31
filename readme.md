@@ -42,6 +42,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 
 -auto barter, po klinięciu alt+b z otwartym oknem barteru, wykonuje po kolei wszystkie dostępne możliwe receptury. użyteczne np. w wymianie itemków z agara, czy wakacyjnej wymianie uni/her na rebitki kolosów. NIE POLECAM UZYWAC W SYTUACJACH GDY Z TYCH SAMYCH ITEMÓW MOŻNA TWORZYĆ RÓŻNE RZECZY, NP BARTER Z KOPALNI, CZY WYMIANA HEROSOWYCH SKRZYNEK
 
+-klanowicze online - ładne okienko które pozwala ogarnąć kto i gdzie jest w grze bez otwierania klanu
+
 # skąd wziąć link do webhooka do discordowych dodatków
 
 trzeba mieć odpowiednie uprawnienia na serwerze discord
