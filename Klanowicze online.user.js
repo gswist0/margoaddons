@@ -33,7 +33,7 @@
   /* ================================================= */
 
   const STORE_KEY = 'ni_klanowicze_online_v2';
-  const PROFS = { w: 'Wojownik', m: 'Mag', p: 'Paladyn', h: 'Łowca', b: 'Tropiciel', t: 'Tancerz ostrzy' };
+  const PROFS = { w: 'Wojownik', m: 'Mag', p: 'Paladyn', h: 'Łowca', t: 'Tropiciel', b: 'Tancerz ostrzy' };
 
   const load = () => {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
