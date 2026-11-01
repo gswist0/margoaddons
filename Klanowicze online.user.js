@@ -310,11 +310,6 @@
   };
 
   /* ---------- start ---------- */
-  // Zapytania do serwera w trakcie przelogowywania (wylogowania) mogą je przerwać,
-  // dlatego wstrzymujemy odświeżanie, gdy gra zaczyna zmianę postaci.
-  const RELOG_RE = /logoff|logout|relog|change_?char|change_?player|switch_?char/i;
-  const PAUSE_MS = 90 * 1000; // bezpiecznik: wznowienie, gdyby 'logoff&a=stop' nigdy nie nadszedł
-
   // nick własnej postaci – wykluczamy ją z listy
   const myNick = () => {
     const h = window.Engine && Engine.hero;
@@ -323,47 +318,67 @@
   };
 
   const gameReady = () => !!(window.Engine && Engine.allInit && Engine.hero);
-  const isPaused = () => Date.now() < state.pausedUntil || !gameReady();
 
-  const installRelogGuard = (ui) => {
-    const pause = (ms, why) => {
-      state.pausedUntil = Date.now() + ms;
-      ui.foot.textContent = 'Wstrzymano odświeżanie (przelogowywanie)…';
-      if (DEBUG) console.log('[Klanowicze] pauza:', why);
-    };
+  // Okno "Wylogowywanie" widać tylko w trakcie wylogowania lub przelogowywania.
+  // Zapytania do serwera w tym czasie mogą je przerwać, więc wtedy nie odświeżamy listy.
+  // "Za 4s opuścisz Grę" (wylogowanie) oraz "Za 5s nastąpi przelogowanie na Postać … na Świat …" (zmiana postaci/świata)
+  const LOGOFF_TEXTS = ['opuścisz', 'nastąpi przelogowanie', 'przelogowanie na', 'leave the game'];
+  const LOGOFF_XPATH = '//text()[' + LOGOFF_TEXTS.map((t) => `contains(., '${t}')`).join(' or ') + ']';
 
-    const resume = (why) => {
-      state.pausedUntil = 0;
-      ui.foot.textContent = 'Wznowiono odświeżanie.';
-      if (DEBUG) console.log('[Klanowicze] wznowienie:', why);
-    };
+  // Samo słowo na stronie (np. na czacie) NIE wystarcza. Uznajemy okno za okno wylogowania/przelogowania,
+  // gdy jednocześnie: (1) znaleziony tekst jest widoczny i leży poza własnym oknem dodatku,
+  // (2) w małym kontenerze wokół niego jest odliczanie "Za Ns …" oraz (3) przycisk "Anuluj".
+  const COUNTDOWN_RE = /Za\s*\d+\s*s\b/i;
+  const CANCEL_TEXTS = ['anuluj', 'cancel'];
+  const MAX_DIALOG_TEXT = 400;   // okno dialogowe jest małe; duże kontenery (np. cały czat) odrzucamy
+  const MAX_CLIMB = 6;           // ile poziomów w górę szukamy kontenera okna
 
-    // 1) strona się zamyka / przeładowuje (typowe przy zmianie postaci)
-    window.addEventListener('beforeunload', () => pause(Infinity, 'beforeunload'));
-    window.addEventListener('pagehide', () => pause(Infinity, 'pagehide'));
+  // tekst bezpośrednio w elemencie (bez tekstu z zagnieżdżonych elementów)
+  const ownText = (el) =>
+    Array.from(el.childNodes).filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join('').trim().toLowerCase();
 
-    // 2) gra wysyła zapytanie o wylogowanie / zmianę postaci
-    try {
-      const orig = window._g;
-      if (typeof orig === 'function' && !window.__koRelogHook) {
-        const wrapped = function (task) {
-          try {
-            if (typeof task === 'string') {
-              if (DEBUG && !task.startsWith('clan&a=members')) console.log('[Klanowicze] _g:', task);
-              if (/^logoff&a=stop/i.test(task)) resume(task);       // przelogowanie zakończone/anulowane
-              else if (RELOG_RE.test(task)) pause(PAUSE_MS, task);  // np. logoff&a=start
-            }
-          } catch (e) { /* nie blokuj gry */ }
-          return orig.apply(this, arguments);
-        };
-        Object.assign(wrapped, orig);
-        window.__koRelogHook = true;
-        window._g = wrapped;
-      }
-    } catch (e) {
-      console.warn('[Klanowicze] nie udało się podpiąć nasłuchu przelogowania:', e);
-    }
+  // przycisk "Anuluj": element z takim tekstem własnym lub całym (może mieć w środku elementy dekoracyjne),
+  // albo <input value="Anuluj">
+  const isCancelEl = (el) => {
+    if (CANCEL_TEXTS.includes(ownText(el))) return true;
+    if (el.children.length <= 3 && CANCEL_TEXTS.includes((el.textContent || '').trim().toLowerCase())) return true;
+    return typeof el.value === 'string' && CANCEL_TEXTS.includes(el.value.trim().toLowerCase());
   };
+  const TITLE_RE = /wylogowywanie|logging out|changing character/i;
+
+  const dbg = (...a) => { if (DEBUG) console.log('[Klanowicze] okno wylogowania:', ...a); };
+
+  const isLogoffDialogText = (textNode) => {
+    const el = textNode.parentElement;
+    if (!el) return false;
+    if (el.getClientRects().length === 0) return dbg('odrzucone: niewidoczne'), false;
+    if (el.closest('#ko-win')) return false;                                   // własne okno
+    let box = el;
+    for (let i = 0; i < MAX_CLIMB && box && box !== document.body; i++, box = box.parentElement) {
+      const text = box.textContent || '';
+      if (text.length > MAX_DIALOG_TEXT) return dbg('odrzucone: kontener za duży', text.length), false;
+      if (!COUNTDOWN_RE.test(text)) continue;
+      // odliczanie + (przycisk Anuluj LUB tytuł okna) w tym samym małym kontenerze
+      if (TITLE_RE.test(text) || Array.from(box.querySelectorAll('*')).some(isCancelEl)) {
+        dbg('wykryte:', text.replace(/\s+/g, ' ').slice(0, 80), '| kontener:', box.className || box.id || box.tagName);
+        return true;
+      }
+    }
+    return dbg('odrzucone: brak przycisku Anuluj / tytułu przy odliczaniu'), false;
+  };
+
+  const logoffWindowVisible = () => {
+    try {
+      const r = document.evaluate(LOGOFF_XPATH, document.body, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      for (let i = 0; i < r.snapshotLength; i++) {
+        if (isLogoffDialogText(r.snapshotItem(i))) return true;
+      }
+    } catch (e) { /* w razie błędu nie blokujemy odświeżania */ }
+    return false;
+  };
+
+  // pauza na stałe, gdy strona się zamyka / przeładowuje
+  const isPaused = () => Date.now() < state.pausedUntil || !gameReady() || logoffWindowVisible();
 
   const start = () => {
     const h = Engine.hero;
@@ -371,13 +386,15 @@
     if (!clan) return; // gracz bez klanu – dodatek nic nie robi
 
     const ui = buildWindow();
-    installRelogGuard(ui);
+
+    window.addEventListener('beforeunload', () => { state.pausedUntil = Infinity; });
+    window.addEventListener('pagehide', () => { state.pausedUntil = Infinity; });
 
     let busy = false;
     const refresh = async () => {
       if (busy) return;
       if (isPaused()) {
-        if (Date.now() < state.pausedUntil) ui.foot.textContent = 'Wstrzymano odświeżanie (przelogowywanie)…';
+        ui.foot.textContent = 'Wstrzymano odświeżanie (przelogowywanie)…';
         return;
       }
       busy = true;
