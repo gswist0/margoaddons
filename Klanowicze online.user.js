@@ -19,6 +19,7 @@
 
   /* ================== USTAWIENIA ================== */
   const REFRESH_MS = 5 * 1000;    // co ile odświeżać listę
+  const STALE_MAX_MS = 60 * 1000; // tyle czasu pokazujemy stare dane, gdy odświeżenie się nie udaje
   const DEBUG = false;            // true = surowy rekord w stopce + logi w konsoli (F12)
 
   // Odpowiedź serwera (clan&a=members -> members) to PŁASKA lista:
@@ -155,7 +156,7 @@
     return n;
   };
 
-  const state = { showAll: false, members: null, reason: null, pausedUntil: 0 };
+  const state = { showAll: false, members: null, reason: null, fetchedAt: 0, pausedUntil: 0 };
 
   const buildWindow = () => {
     document.head.appendChild(el('style', {}, css));
@@ -301,7 +302,10 @@
       ui.body.appendChild(table);
     }
 
-    ui.foot.textContent = `Odświeżono: ${new Date().toLocaleTimeString('pl-PL')}`;
+    const time = new Date(state.fetchedAt).toLocaleTimeString('pl-PL');
+    ui.foot.textContent = state.reason
+      ? `Nie udało się odświeżyć – dane z ${time} (${state.reason})`
+      : `Odświeżono: ${time}`;
     if (DEBUG && members.length) ui.foot.textContent += ' | rekord: ' + JSON.stringify(members[0].raw);
   };
 
@@ -380,8 +384,15 @@
       try {
         const { flat, reason } = await fetchMembers();
         const me = myNick();
-        state.members = flat ? parseMembers(flat).filter((m) => !me || m.nick !== me) : null;
-        state.reason = reason;
+        if (flat) {
+          state.members = parseMembers(flat).filter((m) => !me || m.nick !== me);
+          state.fetchedAt = Date.now();
+          state.reason = null;
+        } else {
+          // nieudane pobranie: zostawiamy stare dane, o ile nie są starsze niż STALE_MAX_MS
+          state.reason = reason;
+          if (!state.members || Date.now() - state.fetchedAt > STALE_MAX_MS) state.members = null;
+        }
         render(ui);
       } finally {
         busy = false;
