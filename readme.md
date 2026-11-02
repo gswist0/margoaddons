@@ -26,6 +26,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 
 # lista aktualnych skryptów
 
+-powiadomienia na discord - herosy/tytani, grzybki, wrogowie i legendy w jednym dodatku ze wspólnym menu (jedna ikonka, zakładki). skróty alt + H / G / J / L otwierają odpowiednią zakładkę. każdą sekcję można osobno wyłączyć przyciskiem w jej zakładce. ustawienia ze starych dodatków przechodzą automatycznie. NIE UŻYWAĆ RAZEM ZE STARYMI 4 DODATKAMI, bo powiadomienia będą wysyłane podwójnie
+
 -automatyczne wysylanie info o herosie na discord - szczegolowa instrukcja nizej
 
 -automatyczne wysylanie info o dropnietej legendzie na discord - szczegolowa instrukcja nizej
