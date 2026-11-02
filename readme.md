@@ -44,6 +44,12 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 
 -klanowicze online - ładne okienko które pozwala ogarnąć kto i gdzie jest w grze bez otwierania klanu
 
+-lepsze depo - dodatkowe funkcje depozytu takie jak:
+    -zamiana miejscami przedmiotow w depo tak samo jak można to robić w eq (WYMAGA 1 WOLNEGO MIEJSCA W DEPO / EQ GRACZA)
+    -automatyczne stackowanie itemów gdy wrzucamy je 1 klikiem (gdy przeciągamy to wpadnie tam gdzie chcemy)
+    -wrzucanie całej torby (prawy klik na torbę - przy otwartym depo pojawia się nowa opcja w menu kontekstowym - Wrzuć zawartość do depozytu)
+    -nowe opcje filtrowania
+
 # skąd wziąć link do webhooka do discordowych dodatków
 
 trzeba mieć odpowiednie uprawnienia na serwerze discord
