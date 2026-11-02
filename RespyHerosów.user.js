@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Margonem NI - Respy herosów (overlay)
 // @namespace    margonem-heroes-resp
-// @version      2.0
+// @version      2.1
 // @description  Pokazuje (tylko u Ciebie) herosa na jego respach, rysując na własnym canvasie nad grą
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
@@ -22,6 +22,189 @@
     // Jak mocno widoczne są zasięg i kafelek respa (0-1). Zmiana w locie: HeroesRespAddon.setIntensity(0.4)
     let INTENSITY = 0.6;
     const DEBUG = false; // ramka + linia diagnostyczna na overlayu; ustaw false gdy wszystko działa
+
+    const WIDGET_KEY = 'respyherosow';
+    const WIDGET_ICON = 'https://raw.githubusercontent.com/gswist0/margoaddons/refs/heads/main/rh_clear.png';
+    const DEFAULT_WIDGET_POSITION = [4, 'bottom-right-additional'];
+    const PANEL_POSITION_KEY = 'respy_herosow_pozycja';
+    const ENABLED_KEY = 'respy_herosow_wlaczone';
+    const HIDE_VISITED_KEY = 'respy_herosow_ukrywaj_odwiedzone';
+
+    let enabled = localStorage.getItem(ENABLED_KEY) !== 'false';
+    let hideVisited = localStorage.getItem(HIDE_VISITED_KEY) === 'true';
+
+    /* ================== MENU ================== */
+
+    let panel = null;
+    let renderEnabled = () => {};
+
+    function setEnabled(value) {
+        enabled = value;
+        localStorage.setItem(ENABLED_KEY, enabled);
+        renderEnabled();
+    }
+
+    function togglePanel() {
+        if (panel) panel.hidden = !panel.hidden;
+    }
+
+    function buildPanel() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .main-buttons-container .widget-button .icon.${WIDGET_KEY} { background-image: url("${WIDGET_ICON}"); background-position: 0; }
+            #prh-panel { position: fixed; z-index: 9999; width: 300px; display: flex; flex-direction: column; background: #1b1712; color: #e8dcc0; border: 2px solid #6b5a33; border-radius: 6px; font: 12px/1.35 Arial, sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,.6); user-select: none; }
+            #prh-panel, #prh-panel * { box-sizing: border-box; }
+            #prh-panel[hidden] { display: none; }
+            #prh-panel .prh-head { display: flex; align-items: center; gap: 6px; padding: 5px 8px; cursor: move; background: linear-gradient(#3a2f1a, #2a2212); border-bottom: 1px solid #6b5a33; border-radius: 4px 4px 0 0; }
+            #prh-panel .prh-title { flex: 1; font-weight: bold; color: #f1d58a; }
+            #prh-panel .prh-btn { cursor: pointer; background: #4a3d22; border: 1px solid #7a6639; color: #f1d58a; border-radius: 3px; padding: 0 6px; line-height: 18px; font-size: 12px; }
+            #prh-panel .prh-btn:hover { background: #5d4c2a; }
+            #prh-panel .prh-page { padding: 8px 8px 2px; }
+            #prh-panel .prh-toggle { margin-bottom: 8px; text-align: center; color: #d98a7a; }
+            #prh-panel .prh-toggle.on { color: #9fd18b; }
+            #prh-panel .prh-fields { min-width: 0; margin: 0; padding: 0; border: 0; }
+            #prh-panel .prh-fields:disabled { opacity: .4; filter: grayscale(1); }
+            #prh-panel .prh-fields:disabled label, #prh-panel .prh-fields:disabled input { cursor: not-allowed; }
+            #prh-panel .prh-check { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; }
+            #prh-panel .prh-check label { margin: 0; color: #e8dcc0; cursor: pointer; }
+            #prh-panel .prh-check input { margin: 0; accent-color: #7a6639; cursor: pointer; }
+        `;
+        document.head.appendChild(style);
+
+        panel = document.createElement('div');
+        panel.id = 'prh-panel';
+        panel.hidden = true;
+
+        const head = document.createElement('div');
+        head.className = 'prh-head';
+        const title = document.createElement('span');
+        title.className = 'prh-title';
+        title.textContent = 'Respy herosów';
+        const close = document.createElement('span');
+        close.className = 'prh-btn';
+        close.title = 'Zamknij';
+        close.textContent = '×';
+        close.addEventListener('click', () => { panel.hidden = true; });
+        head.append(title, close);
+
+        const page = document.createElement('div');
+        page.className = 'prh-page';
+
+        const toggle = document.createElement('div');
+        toggle.className = 'prh-btn prh-toggle';
+        toggle.addEventListener('click', () => setEnabled(!enabled));
+
+        const fields = document.createElement('fieldset');
+        fields.className = 'prh-fields';
+        const row = document.createElement('div');
+        row.className = 'prh-check';
+        const input = document.createElement('input');
+        input.id = 'prh-hide-visited';
+        input.type = 'checkbox';
+        input.checked = hideVisited;
+        input.addEventListener('change', () => {
+            hideVisited = input.checked;
+            localStorage.setItem(HIDE_VISITED_KEY, hideVisited);
+        });
+        const label = document.createElement('label');
+        label.htmlFor = input.id;
+        label.textContent = 'Ukrywaj resp i obramówkę po wejściu w zasięg';
+        label.title = 'Resp wraca po zmianie lub ponownym wczytaniu mapy';
+        row.append(input, label);
+        fields.appendChild(row);
+
+        renderEnabled = () => {
+            toggle.textContent = enabled ? 'Włączone' : 'Wyłączone';
+            toggle.classList.toggle('on', enabled);
+            fields.disabled = !enabled;
+        };
+        renderEnabled();
+
+        page.append(toggle, fields);
+        panel.append(head, page);
+        document.body.appendChild(panel);
+        installDragging(head);
+    }
+
+    function installDragging(head) {
+        let saved = {};
+        try { saved = JSON.parse(localStorage.getItem(PANEL_POSITION_KEY)) || {}; } catch (e) { /* domyślna pozycja */ }
+        const clampLeft = left => Math.max(0, Math.min(window.innerWidth - 60, left));
+        const clampTop = top => Math.max(0, Math.min(window.innerHeight - 30, top));
+        panel.style.left = clampLeft(saved.left ?? 520) + 'px';
+        panel.style.top = clampTop(saved.top ?? 200) + 'px';
+
+        let drag = null;
+        head.addEventListener('mousedown', event => {
+            if (event.target.classList.contains('prh-btn')) return;
+            drag = { dx: event.clientX - panel.offsetLeft, dy: event.clientY - panel.offsetTop };
+            event.preventDefault();
+        });
+        document.addEventListener('mousemove', event => {
+            if (!drag) return;
+            panel.style.left = clampLeft(event.clientX - drag.dx) + 'px';
+            panel.style.top = clampTop(event.clientY - drag.dy) + 'px';
+        });
+        document.addEventListener('mouseup', () => {
+            if (!drag) return;
+            drag = null;
+            localStorage.setItem(PANEL_POSITION_KEY, JSON.stringify({ left: panel.offsetLeft, top: panel.offsetTop }));
+        });
+    }
+
+    document.addEventListener('keydown', event => {
+        if (!event.altKey || event.key.toLowerCase() !== 'r') return;
+        event.preventDefault();
+        togglePanel();
+    });
+
+    /* ================== WIDGET ================== */
+    // credit to https://github.com/nerthus-margonem/nerthusaddon
+
+    function installWidget() {
+        const Engine = window.Engine;
+
+        const addToDefaultSet = () => Engine.widgetManager.addKeyToDefaultWidgetSet(
+            WIDGET_KEY,
+            DEFAULT_WIDGET_POSITION[0],
+            DEFAULT_WIDGET_POSITION[1],
+            'Respy herosów',
+            'green',
+            togglePanel
+        );
+
+        const createButton = () => {
+            if (Engine.interfaceStart && Object.keys(Engine.widgetManager.getDefaultWidgetSet()).includes(WIDGET_KEY)) {
+                const saved = Engine.serverStorage.get(Engine.widgetManager.getPathToHotWidgetVersion());
+                const position = (saved && saved[WIDGET_KEY]) || DEFAULT_WIDGET_POSITION;
+                Engine.widgetManager.createOneWidget(WIDGET_KEY, { [WIDGET_KEY]: position }, true, []);
+                Engine.widgetManager.setEnableDraggingButtonsWidget(false);
+            } else setTimeout(createButton, 500);
+        };
+
+        const addWidgetButtons = Engine.widgetManager.addWidgetButtons;
+        Engine.widgetManager.addWidgetButtons = function (additionalBarHide) {
+            addWidgetButtons.call(Engine.widgetManager, additionalBarHide);
+            addToDefaultSet();
+            createButton();
+            Engine.widgetManager.addWidgetButtons = addWidgetButtons;
+        };
+
+        if (Engine.interfaceStart) {
+            addToDefaultSet();
+            createButton();
+        }
+    }
+
+    function waitFor(isReady, callback) {
+        if (isReady()) callback();
+        else setTimeout(() => waitFor(isReady, callback), 50);
+    }
+
+    waitFor(() => document.querySelector('.game-window-positioner') && document.head, buildPanel);
+    waitFor(() => window.Engine && window.Engine.widgetManager && window.Engine.widgetManager.addWidgetButtons, installWidget);
+
+    /* ================== OVERLAY ================== */
 
     const waitForEngine = setInterval(() => {
         try {
@@ -47,6 +230,22 @@
 
         let respList = [];
         const imgCache = {};
+        const visited = new Set();   // respy (rx,ry), w których zasięgu gracz był na obecnej mapie
+
+        const respKey = r => r.rx + ',' + r.ry;
+        // ścisła nierówność: dokładnie VIEW_RANGE kratek w prostej już nie widać
+        const inRange = (dx, dy) => dx * dx + dy * dy < VIEW_RANGE * VIEW_RANGE;
+
+        function markVisited() {
+            // getDrawable: przy wczytywaniu mapy dane gracza i respów mogą jeszcze nie być kompletne
+            if (!safe(() => Engine.map.getDrawable())) return;
+            const hx = safe(() => Engine.hero.d.x);
+            const hy = safe(() => Engine.hero.d.y);
+            if (!Number.isFinite(hx) || !Number.isFinite(hy)) return;
+            for (const r of respList) {
+                if (inRange(hx - r.rx, hy - r.ry)) visited.add(respKey(r));
+            }
+        }
 
         function collectResps() {
             const raw = safe(() => Engine.heroesRespManager.test());
@@ -95,18 +294,26 @@
         }
 
         function frame() {
+            if (!enabled) {
+                overlay.style.display = 'none';
+                requestAnimationFrame(frame);
+                return;
+            }
+            overlay.style.display = '';
+
             syncOverlay();
             ctx.clearRect(0, 0, overlay.width, overlay.height);
 
             const off = getOffset();
             const pulse = 0.65 + 0.35 * Math.sin(Date.now() / 400);
 
+            if (hideVisited) markVisited();
+            const visibleResps = hideVisited ? respList.filter(r => !visited.has(respKey(r))) : respList;
+
             // zasięg widoczności: kratki, dla których dx^2 + dy^2 < R^2 (odległość od respa)
             if (SHOW_RANGE && VIEW_RANGE > 0) {
-                const R2 = VIEW_RANGE * VIEW_RANGE;
                 const span = Math.floor(VIEW_RANGE);
-                const inRange = (dx, dy) => dx * dx + dy * dy < R2;   // ścisła nierówność: dokładnie 12 kratek w prostej już nie widać
-                for (const r of respList) {
+                for (const r of visibleResps) {
                     const cx = r.rx * TILE - off[0];
                     const cy = r.ry * TILE - off[1];
                     ctx.save();
@@ -132,7 +339,7 @@
                 }
             }
 
-            for (const r of respList) {
+            for (const r of visibleResps) {
                 const x = r.rx * TILE - off[0];
                 const y = r.ry * TILE - off[1];
 
@@ -200,6 +407,7 @@
         function onMapChange() {
             const staleSig = signature(respList);
             respList = [];                      // stare markery znikają od razu
+            visited.clear();
             clearInterval(fastTimer);
             fastActive = true;
             const started = Date.now();
@@ -243,7 +451,7 @@
         }
 
         const stopFast = () => { fastActive = false; clearInterval(fastTimer); };
-        const clearNow = () => { stopFast(); respList = []; };
+        const clearNow = () => { stopFast(); respList = []; visited.clear(); };
         const refreshNow = () => { stopFast(); respList = collectResps(); };
 
         const okClear = hook('onClear', clearNow, null);
@@ -254,9 +462,7 @@
         requestAnimationFrame(frame);
 
         window.HeroesRespAddon = {
-            toggle() {
-                overlay.style.display = overlay.style.display === 'none' ? '' : 'none';
-            },
+            toggle() { setEnabled(!enabled); },
             list: () => respList,
             setRange(n) { VIEW_RANGE = Number(n) || 0; return VIEW_RANGE; },
             setIntensity(n) { INTENSITY = Math.max(0, Math.min(1, Number(n) || 0)); return INTENSITY; },

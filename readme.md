@@ -16,6 +16,8 @@ legi na discord - alt + L
 
 auto barter - alt + B
 
+respy herosów - alt + R
+
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć "raw" (w pracym górnym rogu). jeśli mamy Tampermonkey, powinno automatycznie otworzyć się okno instalacji skryptu
@@ -38,7 +40,7 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 
 -automatyczne oddawanie D w grupie osobie która napisze "oddaj d" na czacie grupowym
 
--pokazywanie respów herosów (dane brane bezpośrednio z gry) na mapie, wraz z dokładnym zasięgiem skąd ich widać.
+-pokazywanie respów herosów (dane brane bezpośrednio z gry) na mapie, wraz z dokładnym zasięgiem skąd ich widać. w menu (ikonka RH lub alt + R) można wyłączyć dodatek oraz włączyć ukrywanie respu i obramówki po wejściu w jej zasięg - ukryte respy wracają po zmianie mapy
 
 -łatwiejszy pościg. zamiast klikać na kogoś prawy i wybierać w okienku kontekstowym "atakuj" wystarczy trzymając crtl nacisnąć prawy i efekt będzie ten sam. nie jest to autodobijarka i  nie chodzi za nas - korzysta z funkcji pościgu dostępnej w grze na NI
 
