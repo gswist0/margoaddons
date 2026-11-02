@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Powiadomienia na discord
-// @version      1.0
+// @version      1.1
 // @description  Herosy/tytani, grzybki, wrogowie i legendy na discord - jeden dodatek ze wspólnym menu
 // @author       Bancewald
 // @match        *.margonem.pl/
 // @grant        none
 // ==/UserScript==
 
-// Połączone dodatki: Auto heroski, Auto grzybki, Info o wrogach, Legi na discord.
+// Połączone stare dodatki: Auto heroski, Auto grzybki, Info o wrogach, Legi na discord.
 // Klucze localStorage są te same co w starych dodatkach, więc ustawienia przechodzą automatycznie.
 
 (() => {
@@ -45,6 +45,8 @@
                 { key: 'webhook_wrogowie', label: 'Link do webhooka' },
                 { key: 'klany_wrogowie', label: 'Nazwy klanów po przecinku' },
                 { key: 'nicki_wrogowie', label: 'Nicki po przecinku' },
+                { key: 'wrogowie_postaci', label: 'Wysyłaj wrogów postaci', type: 'checkbox' },
+                { key: 'wrogowie_klanu', label: 'Wysyłaj wrogów klanu', type: 'checkbox' },
             ],
         },
         {
@@ -57,6 +59,9 @@
     const HERO_TRACKERS = ['Tropiciel Herosów', 'Wtajemniczony Tropiciel Herosów', 'Doświadczony Tropiciel Herosów'];
     const MUSHROOMS = ['Ogromna płomiennica tląca', 'Ogromna dzwonkówka tarczowata', 'Ogromny bulwiak pospolity', 'Ogromny mroźlarz', 'Ogromny szpicak ponury'];
     const EMBED_COLOR = 8388608;
+    // SocietyData.RELATION z silnika gry
+    const RELATION_ENEMY = 3;
+    const RELATION_CLAN_ENEMY = 6;
 
     /* ================== USTAWIENIA ================== */
 
@@ -398,7 +403,11 @@
         window.API.addCallbackToEvent('newOther', other => {
             if (!enabled.wrogowie || Engine.map.d.pvp == 0) return;
             const clan = other.d.clan && other.d.clan.name;
-            if (parseList(cfg.nicki_wrogowie).includes(other.d.nick) || (clan && parseList(cfg.klany_wrogowie).includes(clan))) {
+            const relation = other.d.relation;
+            if (parseList(cfg.nicki_wrogowie).includes(other.d.nick)
+                || (clan && parseList(cfg.klany_wrogowie).includes(clan))
+                || (cfg.wrogowie_postaci && relation === RELATION_ENEMY)
+                || (cfg.wrogowie_klanu && relation === RELATION_CLAN_ENEMY)) {
                 alertEnemy(other);
             }
         });
