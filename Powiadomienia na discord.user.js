@@ -62,6 +62,7 @@
     // SocietyData.RELATION z silnika gry
     const RELATION_ENEMY = 3;
     const RELATION_CLAN_ENEMY = 6;
+    const LOOT_LOCATIONS = ['l', 'k']; // zwykły i osobisty loot
 
     /* ================== USTAWIENIA ================== */
 
@@ -324,6 +325,10 @@
         const request = new XMLHttpRequest();
         request.open('POST', url, true);
         request.setRequestHeader('Content-Type', 'application/json');
+        request.onload = () => {
+            if (request.status >= 300) console.warn(`[Powiadomienia] discord odrzucił wiadomość (${request.status})`, request.responseText);
+        };
+        request.onerror = () => console.warn('[Powiadomienia] nie udało się połączyć z discordem');
         request.send(JSON.stringify(payload));
         return true;
     }
@@ -414,17 +419,27 @@
 
         const onItem = item => {
             if (item.itemTypeName !== 'legendary') return;
-            if (item.id != null) {
-                if (sentItems.has(item.id)) return;
-                sentItems.add(item.id);
-            }
+            // hid to stały identyfikator przedmiotu; id lootu gra może używać ponownie w kolejnych walkach
+            const key = item.hid || item;
+            if (sentItems.has(key)) return;
+            sentItems.add(key);
             // przedmioty są oznaczane jako wysłane także przy wyłączonej sekcji, żeby po włączeniu nie poleciały stare legi
+            console.log(`[Powiadomienia] legenda: ${item.name} (id ${item.id}, hid ${item.hid}, lokacja ${item.loc}, sekcja ${enabled.legi ? 'włączona' : 'wyłączona'}, webhook ${cfg.webhook_legi ? 'ustawiony' : 'pusty'})`);
             if (enabled.legi) alertLegendary(item);
         };
 
-        Engine.items.fetch(Engine.itemsFetchData.FETCH_NEW_LOOT_ITEM, onItem);
-        // przedmioty z kolosów nie przechodzą przez FETCH_NEW_LOOT_ITEM
-        setInterval(() => Engine.items.fetchLocationItems('k').forEach(onItem), 100);
+        // Podpięcie przed callbackami gry: błąd w którymś z nich (np. w jej powiadomieniu o legendzie)
+        // przerwałby pętlę i nasz callback by się nie wykonał. Łapie też przedmioty, które znikają między odczytami niżej.
+        const newItemInLocation = Engine.items.newItemInLocation;
+        Engine.items.newItemInLocation = function (location, item, ...rest) {
+            if (LOOT_LOCATIONS.includes(location)) {
+                try { onItem(item); } catch (error) { console.error('[Powiadomienia] błąd obsługi przedmiotu', error); }
+            }
+            return newItemInLocation.call(this, location, item, ...rest);
+        };
+
+        // przedmioty, które były już w lootcie przed startem dodatku lub nie przeszły przez newItemInLocation
+        setInterval(() => LOOT_LOCATIONS.forEach(location => Engine.items.fetchLocationItems(location).forEach(onItem)), 100);
     }
 
     /* ================== START ================== */
@@ -442,7 +457,7 @@
         const Engine = window.Engine;
         return Engine && Engine.npcs && Engine.npcs.check
             && Engine.others && Engine.others.check
-            && Engine.items && Engine.itemsFetchData
+            && Engine.items && Engine.items.newItemInLocation
             && window.API;
     }, installListeners);
 })();
