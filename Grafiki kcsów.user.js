@@ -140,6 +140,7 @@
         "Więzienie Demonów": { label: "PRZYZ", file: "tyt/przyz_demon_sekta.gif" }, // Przyzywacz Demonów
         "Nora Jaszczurzych Koszmarów p.1 - sala 2": { label: "MAGUA", file: "tyt/maddok_magua-1a.gif" }, // Maddok Magua
         "Teotihuacan - przedsionek": { label: "TEZCA", file: "tyt/tezcatlipoca.gif" }, // Tezcatlipoca
+        "Topan p.13": { label: "TEZCA", file: "tyt/tezcatlipoca.gif" }, // Tezcatlipoca
         "Sekretne Przejście Kapłanów": { label: "BARBA", file: "tyt/hebrehoth_smokoludzie.gif" }, // Barbatos Smoczy Strażnik
         "Przejście Władców Mrozu": { label: "TANRO", file: "tyt/ice_king.gif" }, // Tanroth
         // https://forum.margonem.pl/?task=forum&show=posts&id=514732
