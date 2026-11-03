@@ -20,6 +20,8 @@ respy herosów - alt + R
 
 agresywność potworów - alt + C
 
+grafiki na kcs - alt + V
+
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć "raw" (w pracym górnym rogu). jeśli mamy Tampermonkey, powinno automatycznie otworzyć się okno instalacji skryptu
@@ -49,6 +51,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 -auto barter, po klinięciu alt+b z otwartym oknem barteru, wykonuje po kolei wszystkie dostępne możliwe receptury. użyteczne np. w wymianie itemków z agara, czy wakacyjnej wymianie uni/her na rebitki kolosów. NIE POLECAM UZYWAC W SYTUACJACH GDY Z TYCH SAMYCH ITEMÓW MOŻNA TWORZYĆ RÓŻNE RZECZY, NP BARTER Z KOPALNI, CZY WYMIANA HEROSOWYCH SKRZYNEK
 
 -agresywność potworów - ikonka AG (lub alt + C) włącza/wyłącza agresywność potworów w pojedynkę z konfiguracji gry. podświetlona ikonka oznacza że opcja jest włączona. nie zmienia opcji agresywności w grupie
+
+-grafiki e2 na kcs - kamienie czerwonego smoka ustawione na mapę z e2 lub na przedsionek tytana/kolosa dostają w ekwipunku, depo itd. grafikę tego potwora, dzięki czemu od razu widać który kamień gdzie prowadzi. w menu (ikonka KC lub alt + V) można wyłączyć grafiki oraz włączyć tekst z krótką nazwą potwora w lewym górnym rogu kamienia. działa tylko po stronie gracza, przedmiot się nie zmienia. gdy na mapie jest kilka e2, używana jest grafika pierwszej z nich
 
 -klanowicze online - ładne okienko które pozwala ogarnąć kto i gdzie jest w grze bez otwierania klanu
 
