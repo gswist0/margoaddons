@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Grafiki kcsów
-// @version      1.6
-// @description  Zamienia grafikę kamieni czerwonego smoka ustawionych na mapę z e2 lub przedsionek tytana/kolosa na grafikę tego potwora
+// @version      1.7
+// @description  Zamienia grafikę kamieni czerwonego smoka ustawionych na mapę z e2 (lub najbliższą jej dostępną) albo przedsionek tytana/kolosa na grafikę tego potwora
 // @match        https://*.margonem.pl/
 // @author       Bancewald
 // @grant        none
@@ -18,45 +18,45 @@
     const LABEL_WIDTH = ICON_SIZE - 2 * LABEL_MARGIN;
     const LABEL_FONT = 'bold 100px Arial';
 
-    // mapa -> potwór
+    // mapa, na którą można ustawić kamień -> potwór
+    // gdy na mapę e2 nie da się ustawić kamienia, wpisana jest najbliższa dostępna na trasie do niej
     // label: tekst na kamieniu; zawsze wypełnia szerokość ikony, więc im krótszy, tym większe litery
     // file: grafika względem /obrazki/npc/
     // e2: https://forum.margonem.pl/?task=forum&show=posts&id=514805
     // gdy na jednej mapie jest kilka e2, używana jest pierwsza z nich
     const BOSSES_BY_MAP = {
-        "Grota Dzikiego Kota": { label: "MUSHI", file: "e2/st-puma.gif" }, // Mushita
+        "Kryjówka Dzikich Kotów": { label: "MUSHI", file: "e2/st-puma.gif" }, // Mushita
         "Las Tropicieli": { label: "KOT", file: "e1/kotolak_lowca.gif" }, // Kotołak Tropiciel
         "Przeklęta Strażnica - podziemia p.2 s.1": { label: "SHAE", file: "e2/demonszef.gif" }, // Shae Phu
         "Przeklęta Strażnica - podziemia p.2 s.3": { label: "SHAE", file: "e2/demonszef.gif" }, // Shae Phu
         "Schowek na łupy": { label: "ZORG", file: "e2/zbir-e2-zorg.gif" }, // Zorg Jednooki Baron
         "Podmokła Dolina": { label: "WRZEK", file: "e2/gobmag2.gif" }, // Władca rzek
-        "Jaskinia Pogardy": { label: "GOBBO", file: "e2/gobsamurai.gif" }, // Gobbos
-        "Pieczara Kwiku - sala 2": { label: "DZIK", file: "e2/dzik.gif" }, // Tyrtajos
+        "Jaskinia Pogardy": { label: "GOBB", file: "e2/gobsamurai.gif" }, // Władca rzek
+        "Pieczara Kwiku - sala 1": { label: "DZIK", file: "e2/dzik.gif" }, // Tyrtajos
         "Stary Kupiecki Trakt": { label: "ALIAS", file: "e2/zbir-szczet.gif" }, // Szczęt alias Gładki
         "Skalne Turnie": { label: "TOL47", file: "e2/tollok_shimger.gif" }, // Tollok Shimger
         "Stare Wyrobisko p.3": { label: "RAZUG", file: "e2/razuglag.gif" }, // Razuglag Oklash
-        "Mokra Grota p.2": { label: "AGAR", file: "e2/glut_agar.gif" }, // Agar
-        "Lazurytowa Grota p.4": { label: "KOBOLD", file: "e2/kobold07.gif" }, // Foverk Turrim
-        "Kopalnia Kapiącego Miodu p.2 - sala Owadziej Matki": { label: "OWAD", file: "e2/zadlak-e2-owadzia-matka.gif" }, // Owadzia Matka
-        "Namiot Vari Krugera": { label: "VARI", file: "e2/gnoll11.gif" }, // Vari Kruger
-        "Jaskinia Gnollich Szamanów - Komnata Kozuga": { label: "FURRUK", file: "e2/gnoll12.gif" }, // Furruk Kozug
-        "Kamienna Jaskinia - sala 3": { label: "JOTUN", file: "e2/kam_olbrzym-b.gif" }, // Jotun
-        "Głębokie Skałki p.3": { label: "TOLP3", file: "e2/tollok_jask_atamatu.gif" }, // Tollok Atamatu
-        "Głębokie Skałki p.4": { label: "TOLP4", file: "e2/tollok_jask_utumatu.gif" }, // Tollok Utumutu
-        "Krypty Dusz Śniegu p.3 - komnata Lisza": { label: "LISZ", file: "e2/lisz_demilisze.gif" }, // Lisz
+        "Mokra Grota p.1": { label: "AGAR", file: "e2/glut_agar.gif" }, // Agar
+        "Lazurytowa Grota p.3 - sala 2": { label: "KOBOLD", file: "e2/kobold07.gif" }, // Foverk Turrim
+        "Kopalnia Kapiącego Miodu p.2 - sala 1": { label: "OWAD", file: "e2/zadlak-e2-owadzia-matka.gif" }, // Owadzia Matka
+        "Wioska Gnolli": { label: "VARI", file: "e2/gnoll11.gif" }, // Vari Kruger
+        "Jaskinia Gnollich Szamanów p.3": { label: "FURRUK", file: "e2/gnoll12.gif" }, // Furruk Kozug
+        "Kamienna Jaskinia - sala 1": { label: "JOTUN", file: "e2/kam_olbrzym-b.gif" }, // Jotun
+        "Głębokie Skałki p.3": { label: "TOL73", file: "e2/tollok_jask_atamatu.gif" }, // Tollok Atamatu
+        "Krypty Dusz Śniegu p.2": { label: "LISZ", file: "e2/lisz_demilisze.gif" }, // Lisz
         "Erem Czarnego Słońca p.5": { label: "GRAB", file: "e2/nieu_mnich_grabarz.gif" }, // Grabarz świątynny
         "Świątynia Andarum - zbrojownia": { label: "ZBROJEK", file: "e2/magaz_zbrojmistrz.gif" }, // Podły zbrojmistrz
-        "Firnowa Grota p.2 s.1": { label: "STOPA", file: "e2/wlochacze_wielka_stopa.gif" }, // Wielka Stopa
+        "Firnowa Grota p.2": { label: "STOPA", file: "e2/wlochacze_wielka_stopa.gif" }, // Wielka Stopa
         "Wylęgarnia Choukkerów p.1": { label: "CHOKP1", file: "e2/dlawiciel5.gif" }, // Choukker
         "Wylęgarnia Choukkerów p.3": { label: "CHOKP3", file: "e2/dlawiciel5.gif" }, // Choukker
         "Kopalnia Margorii": { label: "KRASNO", file: "e2/nadzorczyni_krasnoludow.gif" }, // Nadzorczyni krasnoludów
         "Margoria - Sala Królewska": { label: "MORTH", file: "e2/krasnolud_boss.gif" }, // Morthen
         "Grota Samotnych Dusz p.6": { label: "OHYD", file: "e2/ugrape2.gif" }, // Żelazoręki Ohydziarz
-        "Zapomniany Święty Gaj p.3": { label: "WIDMO", file: "e2/lesne_widmo.gif" }, // Leśne Widmo
-        "Kamienna Strażnica - Sanktuarium": { label: "GOPLA", file: "e2/goplana.gif" }, // Goplana
+        "Zapomniany Święty Gaj p.2": { label: "WIDMO", file: "e2/lesne_widmo.gif" }, // Leśne Widmo
+        "Kamienna Strażnica - wsch. baszta zasypany tunel": { label: "GOPLA", file: "e2/goplana.gif" }, // Goplana
         "Zagrzybiałe Ścieżki p.3": { label: "GNOM", file: "e2/gnom_figlid.gif" }, // Gnom Figlid
         "Dolina Centaurów": { label: "ZYFRYD", file: "e2/cent-zyfryd.gif" }, // Centaur Zyfryd
-        "Namiot Kambiona": { label: "KAMBI", file: "e2/kambion.gif" }, // Kambion
+        "Las Dziwów": { label: "KAMBI", file: "e2/kambion.gif" }, // Kambion
         "Podziemia Zniszczonej Wieży p.5": { label: "JERT", file: "e2/moloch-jertek.gif" }, // Jertek Moxos
         "Zabłocona Jama p.2 - Sala Duszącej Stęchlizny": { label: "MŁOW", file: "e2/blotniaki_milosnik_lowcow.gif" }, // Miłośnik łowców
         "Zabłocona Jama p.2 - Sala Błotnistych Odmętów": { label: "MRYC", file: "e2/blotniaki_milosnik_rycerzy.gif" }, // Miłośnik rycerzy
@@ -71,12 +71,12 @@
         "Wulkan Politraki p.1 - sala 3": { label: "IFRYT", file: "e2/magradit_ifryt.gif" }, // Ifryt
         "Ukryta Grota Morskich Diabłów - skarbiec": { label: "HENRY", file: "e1/pirat5b.gif" }, // Henry Kaprawe Oko
         "Ukryta Grota Morskich Diabłów - siedziba": { label: "HELGA", file: "e2/pirat-2b.gif" }, // Helga Opiekunka Rumu
-        "Ukryta Grota Morskich Diabłów - Magazyn": { label: "JACK", file: "e2/pirat01.gif" }, // Młody Jack Truciciel
+        "Ukryta Grota Morskich Diabłów - magazyn": { label: "JACK", file: "e2/pirat01.gif" }, // Młody Jack Truciciel
         "Piaszczysta Grota p.1 - sala 2": { label: "EOL", file: "e2/piaskowy_potwor-6a.gif" }, // Eol
-        "Kopalnia Żółtego Kruszcu p.2 - sala 2": { label: "GRUBB", file: "e2/grubber-ochlaj.gif" }, // Grubber Ochlaj
+        "Kopalnia Żółtego Kruszcu p.2 - sala 1": { label: "GRUBB", file: "e2/grubber-ochlaj.gif" }, // Grubber Ochlaj
         "Kuźnia Worundriela - Komnata Żaru": { label: "KOWAL", file: "e2/worundriel02.gif" }, // Mistrz Worundriel
-        "Chata wójta Fistuły p.1": { label: "WÓJT", file: "e2/goral-e2-wojt-fistula.gif" }, // Wójt Fistuła
-        "Chata Teściowej": { label: "TEŚĆ", file: "e2/goral-e2-tesciowa-rumcajsa.gif" }, // Teściowa Rumcajsa
+        "Chata wójta Fistuły": { label: "WÓJT", file: "e2/goral-e2-wojt-fistula.gif" }, // Wójt Fistuła
+        "Babi Wzgórek": { label: "TEŚĆ", file: "e2/goral-e2-tesciowa-rumcajsa.gif" }, // Teściowa Rumcajsa
         "Cenotaf Berserkerów p.1 - sala 2": { label: "AMUNO", file: "e2/amuno.gif" }, // Berserker Amuno
         "Mała Twierdza - sala główna": { label: "FODUG", file: "e2/fodug_zolash.gif" }, // Fodug Zolash
         "Lokum Złych Goblinów - warsztat": { label: "GOONS", file: "e2/goons_asterus-1a.gif" }, // Goons Asterus
@@ -96,7 +96,7 @@
         "Szlamowe Kanały p.2 - sala 3": { label: "SZCZUR", file: "e2/mysiur_myswiorowy_krol-1a.gif" }, // Mysiur Myświórowy Król
         "Przerażające Sypialnie": { label: "SADOL", file: "e2/sekta-sadolia.gif" }, // Sadolia Nadzorczyni Hurys
         "Sale Rozdzierania": { label: "BERGA", file: "e2/sekta-bergermona.gif" }, // Bergermona Krwawa Hrabina
-        "Sala Skaryfikacji Grzeszników": { label: "SATAN", file: "e2/sekta-sataniel.gif" }, // Sataniel Skrytobójca
+        "Przejście Oczyszczenia": { label: "SATAN", file: "e2/sekta-sataniel.gif" }, // Sataniel Skrytobójca
         "Tajemnicza Siedziba": { label: "TS", file: "e2/sekta-annaniel.gif" }, // Annaniel Wysysacz Marzeń, też: Gothardus Kolekcjoner Głów
         "Sala Tysiąca Świec": { label: "ZUF", file: "e2/sekta-zufulus.gif" }, // Zufulus Smakosz Serc
         "Zalana Grota": { label: "CZEMP", file: "e2/forbol03.gif" }, // Czempion Furboli
@@ -109,12 +109,12 @@
         "Nocna Pustelnia p.2": { label: "LUNA", file: "e2/elgary_luna-1b.gif" }, // Luna, też: Noumenia
         "Źródło Zakorzenionego Ludu": { label: "DENDRO", file: "e2/dendroculus.gif" }, // Dendroculus
         "Krzaczasta Grota - sala główna": { label: "SILVA", file: "e2/silvanasus.gif" }, // Silvanasus
-        "Złota Góra p.3 - sala 2": { label: "BOLITA", file: "e2/bolita.gif" }, // Tolypeutes
-        "Chantli Cuaitla Citlalina": { label: "CUAIT", file: "e2/maho-cuaitl.gif" }, // Cuaitl Citlalin
-        "Zachodni Mictlan p.9": { label: "YAOTL", file: "e2/mahoplowca.gif" }, // Yaotl
-        "Wschodni Mictlan p.9": { label: "P9", file: "e2/quetzalcoatl-1a.gif" }, // Quetzalcoatl
+        "Złota Góra p.2 - sala 4": { label: "BOLITA", file: "e2/bolita.gif" }, // Tolypeutes
+        "Niecka Xiuh Atl": { label: "CUAIT", file: "e2/maho-cuaitl.gif" }, // Cuaitl Citlalin
+        "Zachodni Mictlan p.8": { label: "YAOTL", file: "e2/mahoplowca.gif" }, // Yaotl
+        "Wschodni Mictlan p.8": { label: "P9", file: "e2/quetzalcoatl-1a.gif" }, // Quetzalcoatl
         "Siedlisko Przyjemnej Woni - źródło": { label: "WABI", file: "e2/trist2_wabicielka-1a.gif" }, // Wabicielka
-        "Potępione Zamczysko - pracownia": { label: "SYBA", file: "e2/tri2_witch_e2.gif" }, // Pogardliwa Sybilla
+        "Potępione Zamczysko - sala ofiarna": { label: "SYBA", file: "e2/tri2_witch_e2.gif" }, // Pogardliwa Sybilla
         "Krater Uwięzienia": { label: "TELLAR", file: "e2/wyslannik_tellarow-1a.gif" }, // Wysłannik Tellarów
         "Szepczące Wyrwy p.3": { label: "FOVOS", file: "e2/fovos-1.gif" }, // Fovos
         "Pustynne Katakumby - Komnata Gwałtownej Śmierci": { label: "CHOP", file: "e2/chopesh2.gif" }, // Chopesz
@@ -123,7 +123,7 @@
         "Świątynia Hebrehotha - sala ofiary": { label: "VAENRA", file: "e2/bar_smoczyca.gif" }, // Vaenra Charkhaam
         "Urwisko Vapora": { label: "TERRO", file: "e2/terrorzaur_pus.gif" }, // Terrozaur
         "Źródło Narumi": { label: "MAZUR", file: "e2/mazurnik_przybrzezny-1a.gif" }, // Mazurnik Przybrzeżny
-        "Drzewo życia p.3": { label: "NYMPH", file: "e2/nymphemonia.gif" }, // Nymphemonia
+        "Drzewo Życia p.2": { label: "NYMPH", file: "e2/nymphemonia.gif" }, // Nymphemonia
         "Sala Mroźnych Szeptów": { label: "ZORIN", file: "e2/wl-mrozu01.gif" }, // Zorin
         "Sala Mroźnych Strzał": { label: "FURION", file: "e2/wl-mrozu02.gif" }, // Furion
         "Sala Lodowej Magii": { label: "ART", file: "e2/wl-mrozu03.gif" }, // Artenius
