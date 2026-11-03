@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lepsze depo
 // @namespace    margonem.depo.swap
-// @version      3.4
+// @version      3.5
 // @description  Dodatkowe funkcje depozytu w margonem (które powinny być 10 lat temu bazowo)
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -104,14 +104,15 @@
     });
     return o;
   }
-  function amountOf(it) {
+  function numericStat(it, name) {
     if (!it) return null;
-    let a = typeof it.stat === 'string' ? parseStat(it.stat).amount : undefined;
-    if (a === undefined && it._cachedStats && typeof it._cachedStats === 'object') a = it._cachedStats.amount;
+    let a = typeof it.stat === 'string' ? parseStat(it.stat)[name] : undefined;
+    if (a === undefined && it._cachedStats && typeof it._cachedStats === 'object') a = it._cachedStats[name];
     if (a === undefined || a === null || a === '') return null;
     const n = Number(a);
     return isNaN(n) ? null : n;
   }
+  const amountOf = it => numericStat(it, 'amount');
   // Klucz tożsamości stacka: nazwa + ikona + staty bez "amount"
   function stackKey(it) {
     const stat = typeof it.stat === 'string'
@@ -122,12 +123,18 @@
   function getItem(id) {
     try { return Engine.items.getItemById(id); } catch (e) { return null; }
   }
+  const maxStack = {}; // klucz stacka -> maksymalna ilość (uczona z częściowych scaleń, gdy brak statu "capacity")
+  // Pełny stack to taki, który osiągnął limit; bez znanego limitu (np. strzały bez "capacity") zakładamy, że jest miejsce
+  function isStackFull(it) {
+    const limit = numericStat(it, 'capacity') || maxStack[stackKey(it)];
+    return !!limit && amountOf(it) >= limit;
+  }
   function findStackCandidates(id) {
     const it = getItem(id);
     if (!it || amountOf(it) === null) return [];
     const key = stackKey(it);
     return getDepoItems().filter(s =>
-      String(s.id) !== String(id) && amountOf(s) !== null && stackKey(s) === key
+      String(s.id) !== String(id) && amountOf(s) !== null && stackKey(s) === key && !isStackFull(s)
     ).sort((a, b) => amountOf(a) - amountOf(b)); // najpierw najmniejsze stacki (największa szansa, że nie są pełne)
   }
 
@@ -265,8 +272,6 @@
   // 3) odłóż S z powrotem do depo na jego pole.
   // Jeśli S był pełny albo po scaleniu została reszta A - bierzemy następny stack, i tak dalej.
   // Resztę, której nie dało się nigdzie dołożyć, odkładamy tam, gdzie chciał gracz.
-  const maxStack = {}; // klucz stacka -> maksymalna ilość (uczona z częściowych scaleń)
-
   async function stackIntoDepo(id, candidates, originalTask) {
     swapping = true;
     const putCmd = (pid, x, y) => `depo&put=${pid}&x=${x}&y=${y}`;
@@ -284,8 +289,8 @@
         if (!cur) continue;                            // stack zniknął
         const sx = Number(cur.x), sy = Number(cur.y);
 
-        if (key && maxStack[key] && amountOf(cur) >= maxStack[key]) {
-          log('pomijam pełny stack:', cur.name, '(' + amountOf(cur) + '/' + maxStack[key] + ')');
+        if (isStackFull(cur)) {                        // limit mógł zostać wykryty dopiero podczas tego scalania
+          log('pomijam pełny stack:', cur.name, '(' + amountOf(cur) + ')');
           continue;
         }
 
