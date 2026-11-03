@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Klanowicze Online (NI)
 // @namespace    margonem-ni-addons
-// @version      2.0
+// @version      2.1
 // @description  Okienko z klanowiczami online: nick, lvl, lokacja. Nowy interfejs Margonem.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -22,10 +22,9 @@
   const STALE_MAX_MS = 60 * 1000; // tyle czasu pokazujemy stare dane, gdy odświeżenie się nie udaje
   const DEBUG = false;            // true = surowy rekord w stopce + logi w konsoli (F12)
 
-  // Odpowiedź serwera (clan&a=members -> members) to PŁASKA lista:
-  //   [ liczba_wstępna, rekord, rekord, ... ]  – każdy rekord ma 11 pól:
-  // [0 nick, 1 lvl, 2 lvl operacyjny, 3 prof, 4 mapa, 5 x, 6 y, 7 ranga, 8 sekundy_od_logowania, 9 ikona, 10 id]
-  const IDX = { NICK: 0, LVL: 1, OPLVL: 2, PROF: 3, MAP: 4, X: 5, Y: 6, RANK: 7, LAST: 8, ICON: 9, ID: 10 };
+  // Odpowiedź serwera (clan&a=members -> members) to PŁASKA lista rekordów po 11 pól (jak w Members.update w grze):
+  // [0 id, 1 nick, 2 lvl, 3 lvl operacyjny, 4 prof, 5 mapa, 6 x, 7 y, 8 ranga, 9 sekundy_od_logowania, 10 ikona]
+  const IDX = { ID: 0, NICK: 1, LVL: 2, OPLVL: 3, PROF: 4, MAP: 5, X: 6, Y: 7, RANK: 8, LAST: 9, ICON: 10 };
   const TUPLE = 11;
 
   // Pole LAST = sekundy od ostatniego logowania; 0 = gracz jest teraz w grze.
@@ -97,11 +96,8 @@
     if (!list.length) return [];
     // (na wszelki wypadek) lista rekordów-tablic
     if (Array.isArray(list[0])) return list.map(toMember);
-    // płaska lista: pierwszy rekord zaczyna się od pierwszego tekstu (nicku), wcześniej jest liczba wstępna
-    let start = list.findIndex((v) => typeof v === 'string');
-    if (start < 0) return [];
     const out = [];
-    for (let i = start; i + TUPLE <= list.length; i += TUPLE) out.push(toMember(list.slice(i, i + TUPLE)));
+    for (let i = 0; i + TUPLE <= list.length; i += TUPLE) out.push(toMember(list.slice(i, i + TUPLE)));
     return out;
   };
 
