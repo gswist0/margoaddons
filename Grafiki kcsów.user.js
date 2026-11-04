@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Grafiki kcsów
-// @version      1.7
+// @version      1.8
 // @description  Zamienia grafikę kamieni czerwonego smoka ustawionych na mapę z e2 (lub najbliższą jej dostępną) albo przedsionek tytana/kolosa na grafikę tego potwora
 // @match        https://*.margonem.pl/
 // @author       Bancewald
@@ -164,6 +164,8 @@
     const PANEL_POSITION_KEY = 'grafiki_kcs_pozycja';
     const GRAPHICS_KEY = 'grafiki_kcs_grafiki';
     const LABELS_KEY = 'grafiki_kcs_tekst';
+    const CUSTOM_KEY = 'grafiki_kcs_wlasne';
+    const CUSTOM_LABEL_MAX_LENGTH = 12;
 
     let showGraphics = localStorage.getItem(GRAPHICS_KEY) !== 'false';
     let showLabels = localStorage.getItem(LABELS_KEY) === 'true';
@@ -176,34 +178,66 @@
         Object.entries(BOSSES_BY_MAP).map(([map, boss]) => [normalize(map), boss])
     );
 
-    // Dłuższe nazwy najpierw, a lookahead odrzuca "Mokra Grota p.2 - sala 3" przy szukaniu "Mokra Grota p.2",
-    // bo to inna mapa niż ta z potworem.
-    const MAP_PATTERNS = Object.entries(BOSSES_BY_MAP)
-        .sort(([a], [b]) => b.length - a.length)
-        .map(([map, boss]) => {
-            const words = map.split(/[^\p{L}\p{N}]+/u).filter(Boolean)
-                .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-            const source = `(?<![\\p{L}\\p{N}])${words.join('[^\\p{L}\\p{N}]*')}(?![\\p{L}\\p{N}]|\\s*-\\s|\\s*[ps]\\.\\s*\\d)`;
-            return { pattern: new RegExp(source, 'iu'), boss };
-        });
+    // Lookahead odrzuca "Mokra Grota p.2 - sala 3" przy szukaniu "Mokra Grota p.2", bo to inna mapa niż ta z potworem.
+    function createMapPattern(map) {
+        const words = map.split(/[^\p{L}\p{N}]+/u).filter(Boolean)
+            .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        const source = `(?<![\\p{L}\\p{N}])${words.join('[^\\p{L}\\p{N}]*')}(?![\\p{L}\\p{N}]|\\s*-\\s|\\s*[ps]\\.\\s*\\d)`;
+        return { pattern: new RegExp(source, 'iu'), map };
+    }
+
+    // dłuższe nazwy najpierw, żeby "Margoria - Sala Królewska" nie została rozpoznana jako "Sala Królewska"
+    const createMapPatterns = maps => [...maps].sort((a, b) => b.length - a.length).map(createMapPattern);
+
+    const MAP_PATTERNS = createMapPatterns(Object.keys(BOSSES_BY_MAP));
+
+    /* ================== WŁASNE USTAWIENIA ================== */
+
+    // znormalizowana mapa -> { map, url, label }
+    const customSettings = new Map();
+    let customPatterns = [];
+
+    function readCustomSettings() {
+        let saved = [];
+        try { saved = JSON.parse(localStorage.getItem(CUSTOM_KEY)) || []; } catch (e) { /* brak ustawień */ }
+        if (!Array.isArray(saved)) return;
+        for (const { map, url, label } of saved) {
+            if (typeof map === 'string' && map) customSettings.set(normalize(map), { map, url: url || '', label: label || '' });
+        }
+        customPatterns = createMapPatterns(Array.from(customSettings.values(), ({ map }) => map));
+    }
+
+    function saveCustomSettings() {
+        localStorage.setItem(CUSTOM_KEY, JSON.stringify([...customSettings.values()]));
+        customPatterns = createMapPatterns(Array.from(customSettings.values(), ({ map }) => map));
+    }
+
+    readCustomSettings();
 
     // teleport=632,7,79,Las Tropicieli
     const TARGET_STAT = /^\d+,\d+,\d+,(.+)$/;
 
     const isStone = (item, stats) => 'custom_teleport' in stats || /czerwonego smoka/i.test(item.name || '');
 
-    function findBoss(item) {
+    // Mapa, na którą ustawiony jest kamień, i to, co jest dla niej zdefiniowane. null: kamień nie jest ustawiony.
+    function findTarget(item) {
         const stats = item.parseStats();
         if (!isStone(item, stats)) return null;
 
+        const describe = map => ({
+            map,
+            boss: BOSS_BY_NORMALIZED_MAP.get(normalize(map)) || null,
+            custom: customSettings.get(normalize(map)) || null,
+        });
+
         for (const stat of [stats.custom_teleport, stats.teleport]) {
             const target = TARGET_STAT.exec(stat || '');
-            if (target) return BOSS_BY_NORMALIZED_MAP.get(normalize(target[1])) || null;
+            if (target) return describe(target[1]);
         }
 
         // brak celu w znanym formacie: nazwa mapy może być w dowolnej innej części statystyk (np. w opisie)
-        const found = MAP_PATTERNS.find(({ pattern }) => pattern.test(item.stat || ''));
-        return found ? found.boss : null;
+        const found = [...customPatterns, ...MAP_PATTERNS].find(({ pattern }) => pattern.test(item.stat || ''));
+        return found ? describe(found.map) : null;
     }
 
     /* ================== GRAFIKA ================== */
@@ -299,12 +333,30 @@
         );
     });
 
+    // Loader gry czyta tylko pliki z jej serwera. crossOrigin jest konieczny, bo bez niego canvas z tym obrazkiem
+    // byłby zablokowany do odczytu. Animacja nie jest obsługiwana: przeglądarka daje dostęp tylko do pierwszej klatki.
+    const loadExternalImage = url => new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => {
+            if (!image.naturalWidth) return reject(new Error('pusty obrazek'));
+            resolve({ image, info: { hdr: { width: image.naturalWidth, height: image.naturalHeight }, frames: [{ delay: 10 }] } });
+        };
+        image.onerror = reject;
+        image.src = url;
+    });
+
     // Co pokazać na kamieniu. null oznacza zwykłą ikonę z gry.
+    // Własne ustawienia są zawsze widoczne, a opcje w menu dotyczą tylko grafik i tekstów wbudowanych.
     function chooseIcon(item) {
-        const boss = findBoss(item);
-        if (!boss) return null;
-        const label = showLabels ? boss.label : '';
-        if (showGraphics) return { path: window.CFG.r_npath + boss.file, crop: true, label };
+        const target = findTarget(item);
+        if (!target) return null;
+        const { boss, custom } = target;
+        if (!boss && !custom) return null;
+
+        const label = (custom && custom.label) || (showLabels && boss ? boss.label : '');
+        if (custom && custom.url) return { path: custom.url, external: true, crop: true, label };
+        if (showGraphics && boss) return { path: window.CFG.r_npath + boss.file, crop: true, label };
         if (label) return { path: window.CFG.r_ipath + item.icon, crop: false, label };
         return null;
     }
@@ -316,7 +368,8 @@
     function loadIcon(icon) {
         const key = iconKey(icon);
         if (!iconCache.has(key)) {
-            const sprite = loadImage(icon.path).then(({ image, info }) => buildIconSprite(image, info, icon));
+            const load = icon.external ? loadExternalImage : loadImage;
+            const sprite = load(icon.path).then(({ image, info }) => buildIconSprite(image, info, icon));
             // po błędzie sieci kolejna próba ma szansę się udać
             sprite.catch(() => iconCache.delete(key));
             iconCache.set(key, sprite);
@@ -370,6 +423,14 @@
         // przestawienie kamienia na inną mapę aktualizuje ten sam obiekt przedmiotu
         item.on('afterUpdate', sync);
         sync();
+
+        // Gra buduje menu kontekstowe z metod przedmiotu, a stickTip jest wywoływane w każdym z nich.
+        const stickTip = item.stickTip;
+        item.stickTip = function (menu) {
+            stickTip.call(this, menu);
+            const target = findTarget(item);
+            if (target) menu.push([CUSTOM_MENU_TEXT, () => openCustomForm({ map: target.map, locked: true })]);
+        };
     }
 
     function installItemHook() {
@@ -390,10 +451,157 @@
 
     /* ================== MENU ================== */
 
+    const CUSTOM_MENU_TEXT = 'Własna grafika i tekst';
+
     let panel = null;
+    let openCustomForm = () => {};
 
     function togglePanel() {
         if (panel) panel.hidden = !panel.hidden;
+    }
+
+    function createButton(text, onClick) {
+        const button = document.createElement('span');
+        button.className = 'kcs-btn';
+        button.textContent = text;
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
+    function createField(id, text, placeholder) {
+        const row = document.createElement('div');
+        row.className = 'kcs-field';
+        const label = document.createElement('label');
+        label.htmlFor = id;
+        label.textContent = text;
+        const input = document.createElement('input');
+        input.id = id;
+        input.type = 'text';
+        input.placeholder = placeholder;
+        row.append(label, input);
+        return { row, input };
+    }
+
+    function buildCustomSection() {
+        const section = document.createElement('div');
+        section.className = 'kcs-custom';
+
+        const title = document.createElement('div');
+        title.className = 'kcs-section-title';
+        title.textContent = 'Własne ustawienia';
+
+        const list = document.createElement('div');
+        list.className = 'kcs-list';
+
+        const form = document.createElement('div');
+        form.className = 'kcs-form';
+        form.hidden = true;
+
+        const mapField = createField('kcs-custom-map', 'Lokacja kamienia', 'np. Ithan');
+        const urlField = createField('kcs-custom-url', 'Link do grafiki', 'https://...');
+        const labelField = createField('kcs-custom-label', 'Tekst', 'np. ITHAN');
+        labelField.input.maxLength = CUSTOM_LABEL_MAX_LENGTH;
+
+        const status = document.createElement('div');
+        status.id = 'kcs-custom-status';
+        status.className = 'kcs-status';
+
+        // po zamknięciu formularza wynik wcześniejszego sprawdzania obrazka nie może już niczego zapisać
+        let saveAttempt = 0;
+
+        const closeForm = () => {
+            saveAttempt++;
+            form.hidden = true;
+        };
+
+        const renderList = () => {
+            list.textContent = '';
+            const settings = [...customSettings.values()].sort((a, b) => a.map.localeCompare(b.map));
+            for (const { map, url, label } of settings) {
+                const row = document.createElement('div');
+                row.className = 'kcs-row';
+                const preview = document.createElement('div');
+                preview.className = 'kcs-preview';
+                if (url) preview.style.backgroundImage = `url("${url.replace(/["\\]/g, encodeURIComponent)}")`;
+                const name = document.createElement('span');
+                name.className = 'kcs-row-name';
+                name.textContent = label ? `${map} (${label})` : map;
+                name.title = name.textContent;
+                const edit = createButton('Edytuj', () => openCustomForm({ map, locked: true }));
+                const remove = createButton('Usuń', () => {
+                    customSettings.delete(normalize(map));
+                    saveCustomSettings();
+                    renderList();
+                    refreshItems();
+                });
+                row.append(preview, name, edit, remove);
+                list.append(row);
+            }
+            list.hidden = !settings.length;
+        };
+
+        const save = async () => {
+            const map = mapField.input.value.trim();
+            const url = urlField.input.value.trim();
+            const label = labelField.input.value.trim();
+            const attempt = ++saveAttempt;
+            const showStatus = text => { status.textContent = text; };
+
+            if (!map) return showStatus('Podaj lokację kamienia.');
+            if (!url && !label) return showStatus('Podaj link do grafiki albo tekst.');
+            if (url) {
+                let protocol = '';
+                try { protocol = new URL(url).protocol; } catch (e) { /* komunikat niżej */ }
+                if (protocol !== 'https:') return showStatus('Link musi zaczynać się od https://');
+
+                showStatus('Sprawdzam grafikę...');
+                try {
+                    await loadExternalImage(url);
+                } catch (e) {
+                    if (attempt === saveAttempt) {
+                        showStatus('Nie można użyć tej grafiki. Link musi prowadzić wprost do obrazka, a jego serwer musi zezwalać na CORS (np. GitHub).');
+                    }
+                    return;
+                }
+                if (attempt !== saveAttempt) return;
+            }
+
+            customSettings.set(normalize(map), { map, url, label });
+            saveCustomSettings();
+            renderList();
+            closeForm();
+            refreshItems();
+        };
+
+        const saveButton = createButton('Zapisz', save);
+        saveButton.id = 'kcs-custom-save';
+        const cancelButton = createButton('Anuluj', closeForm);
+        cancelButton.id = 'kcs-custom-cancel';
+        const formButtons = document.createElement('div');
+        formButtons.className = 'kcs-buttons';
+        formButtons.append(saveButton, cancelButton);
+        form.append(mapField.row, urlField.row, labelField.row, status, formButtons);
+
+        openCustomForm = ({ map = '', locked = false } = {}) => {
+            saveAttempt++;
+            const saved = customSettings.get(normalize(map));
+            mapField.input.value = saved ? saved.map : map;
+            mapField.input.readOnly = locked;
+            urlField.input.value = saved ? saved.url : '';
+            labelField.input.value = saved ? saved.label : '';
+            status.textContent = '';
+            form.hidden = false;
+            panel.hidden = false;
+            (locked ? urlField.input : mapField.input).focus();
+        };
+
+        const addButton = createButton('Dodaj własne ustawienie', () => openCustomForm());
+        addButton.id = 'kcs-custom-add';
+        addButton.classList.add('kcs-add');
+
+        renderList();
+        section.append(title, list, addButton, form);
+        return section;
     }
 
     function createCheckbox(id, text, checked, onChange) {
@@ -419,7 +627,7 @@
         const style = document.createElement('style');
         style.textContent = `
             .main-buttons-container .widget-button .icon.${WIDGET_KEY} { background-image: url("${WIDGET_ICON}"); background-position: 0; }
-            #kcs-panel { position: fixed; z-index: 9999; width: 260px; display: flex; flex-direction: column; background: #1b1712; color: #e8dcc0; border: 2px solid #6b5a33; border-radius: 6px; font: 12px/1.35 Arial, sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,.6); user-select: none; }
+            #kcs-panel { position: fixed; z-index: 9999; width: 300px; display: flex; flex-direction: column; background: #1b1712; color: #e8dcc0; border: 2px solid #6b5a33; border-radius: 6px; font: 12px/1.35 Arial, sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,.6); user-select: none; }
             #kcs-panel, #kcs-panel * { box-sizing: border-box; }
             #kcs-panel[hidden] { display: none; }
             #kcs-panel .kcs-head { display: flex; align-items: center; gap: 6px; padding: 5px 8px; cursor: move; background: linear-gradient(#3a2f1a, #2a2212); border-bottom: 1px solid #6b5a33; border-radius: 4px 4px 0 0; }
@@ -430,6 +638,24 @@
             #kcs-panel .kcs-check { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; }
             #kcs-panel .kcs-check label { margin: 0; color: #e8dcc0; cursor: pointer; }
             #kcs-panel .kcs-check input { margin: 0; accent-color: #7a6639; cursor: pointer; }
+            #kcs-panel [hidden] { display: none; }
+            #kcs-panel .kcs-custom { margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #6b5a33; }
+            #kcs-panel .kcs-section-title { margin-bottom: 6px; font-weight: bold; color: #f1d58a; }
+            #kcs-panel .kcs-list { max-height: 160px; margin-bottom: 6px; overflow-y: auto; }
+            #kcs-panel .kcs-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+            #kcs-panel .kcs-row .kcs-btn { padding: 0 4px; font-size: 11px; }
+            #kcs-panel .kcs-row-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+            #kcs-panel .kcs-preview { flex: none; width: 24px; height: 24px; background: #2a2212 center / contain no-repeat; border: 1px solid #6b5a33; }
+            #kcs-panel .kcs-add { display: block; text-align: center; }
+            #kcs-panel .kcs-form { margin-top: 8px; }
+            #kcs-panel .kcs-field { margin-bottom: 6px; }
+            #kcs-panel .kcs-field label { display: block; margin-bottom: 2px; color: #b9a56a; }
+            #kcs-panel .kcs-field input { display: block; width: 100%; padding: 2px 4px; background: #2a2212; color: #e8dcc0; border: 1px solid #6b5a33; border-radius: 3px; font: inherit; user-select: text; }
+            #kcs-panel .kcs-field input:read-only { color: #b9a56a; background: #1b1712; }
+            #kcs-panel .kcs-status { margin-bottom: 6px; color: #d98a7a; }
+            #kcs-panel .kcs-status:empty { display: none; }
+            #kcs-panel .kcs-buttons { display: flex; gap: 6px; }
+            #kcs-panel .kcs-buttons .kcs-btn { flex: 1; text-align: center; }
         `;
         document.head.appendChild(style);
 
@@ -463,7 +689,7 @@
             refreshItems();
         });
 
-        page.append(graphicsRow, labelsRow);
+        page.append(graphicsRow, labelsRow, buildCustomSection());
         panel.append(head, page);
         document.body.appendChild(panel);
         installDragging(head);
