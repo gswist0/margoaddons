@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Ulepszanie przedmiotów
-// @version      1.7
+// @version      1.8
 // @description  Ulepsza wybrany przedmiot wszystkimi zdobytymi łupami do ustawionej jakości, nigdy nie używa legend
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
@@ -31,6 +31,7 @@
     const BATCH_OPTIONS = [1, 5, 10, 25];
     const DEFAULT_BATCH = 10;
     const CUSTOM_BATCH = 'custom';
+    const FULL_BAG_BATCH = 'bag';
     const MAX_CUSTOM_BATCH = 999;
     const LOOT_MAX_WAIT_MS = 2 * 60 * 1000; // łup nie czeka dłużej na zebranie pełnej partii
     const MAX_UPGRADE_LEVEL = 5;
@@ -61,6 +62,7 @@
     let maxRank = 0;
     let enabled = true;
     let batchSize = DEFAULT_BATCH;
+    let waitForFullBag = false;
 
     // idle (trzeba otworzyć okno gry) | loading | progressing | upgradable | completed | missing | error
     let state = 'idle';
@@ -76,6 +78,7 @@
     let craftingWasOpen = false;
     let viewEnabled = null;
     let flushRequested = false;
+    let savedQueue = '[]';
     // sesja ulepszania na serwerze, którą dodatek otwiera na czas zużywania łupu, bez okna w grze
     let session = null;
     let ownOpenPending = false;
@@ -349,14 +352,38 @@
         return rx === undefined || (Number(rx) === Number(d.x) && Number(ry) === Number(d.y));
     }
 
-    const isBatchReady = () => queue.length > 0 && (flushRequested || queue.length >= batchSize || Date.now() - queue[0].lootedAt >= LOOT_MAX_WAIT_MS);
+    // Getter gry pomija torbę na klucze, do której łup i tak nie trafia.
+    const getFreeBagSlots = () => window.Engine.heroEquipment.getFreeSlots();
+
+    function isBatchReady() {
+        if (!queue.length) return false;
+        if (flushRequested) return true;
+        if (waitForFullBag) return getFreeBagSlots() === 0;
+        return queue.length >= batchSize || Date.now() - queue[0].lootedAt >= LOOT_MAX_WAIT_MS;
+    }
+
+    // Przy zapełnianiu toreb łup czeka nawet godzinami, a odświeżenie gry nie może o nim zapomnieć.
+    function saveQueue() {
+        const serialized = JSON.stringify(queue);
+        if (serialized === savedQueue) return;
+        savedQueue = serialized;
+        save('kolejka', serialized);
+    }
+
+    function loadQueue() {
+        try {
+            const entries = JSON.parse(load('kolejka') || '[]');
+            if (Array.isArray(entries)) queue = entries;
+        } catch (e) { /* uszkodzony zapis: pusta kolejka */ }
+    }
 
     // Serwer przyjmuje ulepszanie tylko zaraz po action=open: bez tego zrywa połączenie (die-response).
     // O oknie wie jednak tylko z tego zapytania, więc dodatek je wysyła, a gra nie dostaje polecenia otwarcia okna.
     function startSession() {
         const Engine = window.Engine;
         const id = targetId;
-        session = {};
+        // Sesja bywa potrzebna tylko do wczytania stanu przedmiotu i wtedy nie może ruszać kolejki.
+        session = { draining: isWorking() && isBatchReady() };
         flushRequested = false;
         if (state === 'idle') state = 'loading';
         // Ta sama blokada co przy otwartym oknie: krok bohatera w trakcie sesji mógłby ją zakończyć.
@@ -391,11 +418,14 @@
         // gracz otworzył w tym czasie prawdziwe okno, a odpowiedzi nadpisałyby to, co w nim wybrał
         if (!target || window.Engine.crafting.isOpen() || !isWorking() || isInBattle()) {
             closeSession();
+        } else if (!session.draining && !isBatchReady()) {
+            closeSession();
         } else if (nextStep) {
             const step = nextStep;
             nextStep = null;
             step();
         } else {
+            session.draining = true;
             const batch = takeBatch(target);
             if (batch.length) sendBatch(batch);
             else closeSession();
@@ -473,6 +503,7 @@
             }
         }
 
+        saveQueue();
         render();
     }
 
@@ -504,7 +535,10 @@
         if (session) return `Ulepszanie... (w kolejce: ${queue.length})`;
         if (isCraftingOpen()) return 'Wstrzymane, dopóki otwarte jest okno ulepszania.';
         if (isInBattle()) return 'Wstrzymane na czas walki.';
-        return queue.length ? `Zebrane: ${queue.length}/${batchSize}` : 'Czekam na łup.';
+        if (!queue.length) return 'Czekam na łup.';
+        return waitForFullBag
+            ? `Zebrane: ${queue.length}, wolne miejsca w torbach: ${getFreeBagSlots()}`
+            : `Zebrane: ${queue.length}/${batchSize}`;
     }
 
     const percent = (current, max) => (max > 0 ? Math.min(100, Math.floor(current / max * 100)) : 0);
@@ -658,14 +692,15 @@
         field.append(qualityLabel, quality, createElement('div', 'ul-hint', 'Legendy, artefakty i ulepszone nigdy nie są zużywane.'));
 
         const batchField = createElement('div', 'ul-field');
-        const batchLabel = createElement('label', '', 'Zużywaj łup po zebraniu');
+        const batchLabel = createElement('label', '', 'Zużywaj łup po');
         batchLabel.htmlFor = 'ul-batch';
         const batchSelect = document.createElement('select');
         batchSelect.id = 'ul-batch';
-        for (const size of BATCH_OPTIONS) batchSelect.add(new Option(size === 1 ? '1 przedmiotu' : `${size} przedmiotów`, size));
-        batchSelect.add(new Option('Własna liczba', CUSTOM_BATCH));
-        const isCustomBatch = !BATCH_OPTIONS.includes(batchSize);
-        batchSelect.value = isCustomBatch ? CUSTOM_BATCH : batchSize;
+        for (const size of BATCH_OPTIONS) batchSelect.add(new Option(size === 1 ? '1 przedmiocie' : `${size} przedmiotach`, size));
+        batchSelect.add(new Option('własnej liczbie przedmiotów', CUSTOM_BATCH));
+        batchSelect.add(new Option('zapełnieniu toreb', FULL_BAG_BATCH));
+        const isCustomBatch = !waitForFullBag && !BATCH_OPTIONS.includes(batchSize);
+        batchSelect.value = waitForFullBag ? FULL_BAG_BATCH : isCustomBatch ? CUSTOM_BATCH : batchSize;
 
         const batchInput = document.createElement('input');
         batchInput.id = 'ul-batch-custom';
@@ -680,13 +715,20 @@
 
         const setBatchSize = size => {
             batchSize = size;
+            waitForFullBag = false;
             save('partia', batchSize);
             render();
         };
         batchSelect.addEventListener('change', () => {
             const custom = batchSelect.value === CUSTOM_BATCH;
             batchInput.hidden = !custom;
-            if (custom) {
+            if (batchSelect.value === FULL_BAG_BATCH) {
+                waitForFullBag = true;
+                save('partia', FULL_BAG_BATCH);
+                batchSelect.blur();
+                render();
+            } else if (custom) {
+                setBatchSize(batchSize);
                 batchInput.value = batchSize;
                 batchInput.focus();
                 batchInput.select();
@@ -859,6 +901,10 @@
         const savedRank = Number(load('jakosc'));
         if (RARITY_OPTIONS.some(({ rank }) => rank === savedRank)) maxRank = savedRank;
         enabled = load('wlaczone') !== 'false';
+        waitForFullBag = load('partia') === FULL_BAG_BATCH;
+        // Wyłączony dodatek zapomina łup, inaczej po ponownym włączeniu zużyłby stare przedmioty.
+        savedQueue = load('kolejka') || '[]';
+        if (enabled) loadQueue();
         const savedBatch = Number(load('partia'));
         if (Number.isInteger(savedBatch) && savedBatch >= 1 && savedBatch <= MAX_CUSTOM_BATCH) batchSize = savedBatch;
         if (load('w_toku')) {
