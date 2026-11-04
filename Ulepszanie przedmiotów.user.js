@@ -26,7 +26,7 @@
     const SESSION_STEP_MS = 50;
     const SESSION_LOCK = 'ulepszanie-przedmiotow';
     // Próba: false przywraca czekanie, aż bohater stanie, i blokadę ruchu na czas sesji.
-    const ALLOW_WALKING_DURING_SESSION = true;
+    const ALLOW_WALKING_DURING_SESSION = false;
     const MAX_BATCH = 25; // tyle składników mieści okno gry
     const BATCH_OPTIONS = [1, 5, 10, 25];
     const DEFAULT_BATCH = 10;
