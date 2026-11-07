@@ -1,0 +1,67 @@
+{
+  "agresywnosc-potworow": {
+    "name": "Agresywność potworów",
+    "version": "1.1",
+    "file": "Agresywność potworów.user.js"
+  },
+  "auto-barter": {
+    "name": "Auto barter",
+    "version": "1.1",
+    "file": "Auto barter.user.js"
+  },
+  "grafiki-kcsow": {
+    "name": "Grafiki kcsów",
+    "version": "1.9",
+    "file": "Grafiki kcsów.user.js"
+  },
+  "klanowicze-online": {
+    "name": "Klanowicze online",
+    "version": "2.3",
+    "file": "Klanowicze online.user.js"
+  },
+  "latwiejszy-poscig": {
+    "name": "Łatwiejszy pościg",
+    "version": "3.2",
+    "file": "Łatwiejszy pościg.user.js"
+  },
+  "lepsze-aukcje": {
+    "name": "Lepsze aukcje",
+    "version": "2.3",
+    "file": "Lepsze aukcje.user.js"
+  },
+  "lepsze-depo": {
+    "name": "Lepsze depo",
+    "version": "3.6",
+    "file": "Lepsze depo.user.js"
+  },
+  "oddaj-d": {
+    "name": "Oddaj D",
+    "version": "1.1",
+    "file": "OddajD.user.js"
+  },
+  "powiadomienia-na-discord": {
+    "name": "Powiadomienia na discord",
+    "version": "1.2",
+    "file": "Powiadomienia na discord.user.js"
+  },
+  "pseudonimy": {
+    "name": "Pseudonimy",
+    "version": "2.0",
+    "file": "Pseudonimy.user.js"
+  },
+  "respy-herosow": {
+    "name": "Respy herosów",
+    "version": "2.3",
+    "file": "RespyHerosów.user.js"
+  },
+  "ulepszanie-przedmiotow": {
+    "name": "Ulepszanie przedmiotów",
+    "version": "1.9",
+    "file": "Ulepszanie przedmiotów.user.js"
+  },
+  "zloto-na-koncie": {
+    "name": "Złoto na koncie",
+    "version": "1.3",
+    "file": "Złoto na koncie.user.js"
+  }
+}
