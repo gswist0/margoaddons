@@ -32,6 +32,8 @@ pseudonimy - alt + N
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć "raw" (w pracym górnym rogu). jeśli mamy Tampermonkey, powinno automatycznie otworzyć się okno instalacji skryptu
 
+dodatki same się nie aktualizują. gdy na githubie jest nowsza wersja, na dole okna dodatku (w lepszych aukcjach - w sekcji "Lepsze aukcje" w oknie aukcji, a w dodatkach bez okna - mały komunikat u góry ekranu, najwyżej raz dziennie) pojawia się informacja z linkiem "zaktualizuj z GitHuba". lista aktualnych wersji jest w pliku versions.json
+
 w razie bledow/propozycji pisac
 
 kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA PO PROSTU NAPISAC
