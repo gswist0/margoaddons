@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Klanowicze Online (NI)
 // @namespace    margonem-ni-addons
-// @version      2.1
+// @version      2.2
 // @description  Okienko z klanowiczami online: nick, lvl, lokacja. Nowy interfejs Margonem.
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -41,6 +41,44 @@
     try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...load(), ...patch })); } catch (e) { /* ignoruj */ }
   };
 
+  /* ---------- ochrona wylogowania / przelogowania ---------- */
+  // Jeśli gracz zacznie wylogowanie/przelogowanie, gdy nasze zapytanie o klan jest jeszcze w drodze,
+  // gra anuluje przelogowanie. Dlatego przechwytujemy _g gry: polecenie wylogowania wysłane w trakcie
+  // naszego zapytania czeka, aż przyjdzie odpowiedź, i dopiero wtedy idzie do serwera.
+  // Po każdym takim poleceniu odświeżanie jest wstrzymane na LOGOFF_PAUSE_MS (na czas odliczania).
+  const LOGOFF_TASK_RE = /logoff|logout|relog/i;
+  const LOGOFF_PAUSE_MS = 60 * 1000;
+  let gameG = null;      // oryginalne _g gry
+  let inFlight = false;  // czy nasze zapytanie czeka na odpowiedź
+  let held = [];         // wstrzymane polecenia gry
+
+  const releaseHeld = () => {
+    const queue = held;
+    held = [];
+    queue.forEach(({ self, args }) => {
+      if (DEBUG) console.log('[Klanowicze] wysyłam wstrzymane:', args[0]);
+      try { gameG.apply(self, args); } catch (err) { console.error('[Klanowicze] błąd wstrzymanego polecenia:', err); }
+    });
+  };
+
+  const installGHook = () => {
+    if (gameG || typeof window._g !== 'function') return;
+    gameG = window._g;
+    window._g = function (task) {
+      const t = typeof task === 'string' ? task : '';
+      if (DEBUG) console.log('[Klanowicze] _g gry:', t);
+      if (LOGOFF_TASK_RE.test(t)) {
+        state.pausedUntil = Math.max(state.pausedUntil, Date.now() + LOGOFF_PAUSE_MS);
+        if (inFlight) {
+          if (DEBUG) console.log('[Klanowicze] wstrzymuję do odpowiedzi:', t);
+          held.push({ self: this, args: Array.from(arguments) });
+          return;
+        }
+      }
+      return gameG.apply(this, arguments);
+    };
+  };
+
   /* ---------- pobieranie członków klanu ---------- */
   // Zwraca { flat, reason }. flat = lista rekordów albo null.
   const fetchMembers = () =>
@@ -56,13 +94,18 @@
         finished = true;
         clearTimeout(timeout);
         if (stubbed) Engine.clan = undefined;
+        inFlight = false;
+        // wstrzymane polecenia gry (np. przelogowanie) wysyłamy dopiero po obsłużeniu naszej odpowiedzi
+        if (held.length) setTimeout(releaseHeld, 0);
         resolve({ flat, reason });
       };
       const timeout = setTimeout(() => done(null, 'timeout – serwer nie odpowiedział w 10 s'), 10000);
 
       try {
-        if (typeof window._g !== 'function') return done(null, 'brak funkcji _g');
-        window._g('clan&a=members', (res) => {
+        const g = gameG || window._g;
+        if (typeof g !== 'function') return done(null, 'brak funkcji _g');
+        inFlight = true;
+        g('clan&a=members', (res) => {
           if (DEBUG) console.log('[Klanowicze] odpowiedź:', res);
           if (!res || typeof res !== 'object') return done(null, 'pusta odpowiedź serwera');
 
@@ -381,6 +424,7 @@
     const clan = h && ((h.d && h.d.clan) || h.clan);
     if (!clan) return; // gracz bez klanu – dodatek nic nie robi
 
+    installGHook();
     const ui = buildWindow();
 
     window.addEventListener('beforeunload', () => { state.pausedUntil = Infinity; });
