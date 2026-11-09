@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Złoto na koncie
-// @version      1.3
-// @description  Zlicza łączne złoto wszystkich postaci i depo na koncie na danym serwerze. Pomija konta, na których jesteśmy zastępcą.
+// @version      1.4
+// @description  Zlicza łączne złoto wszystkich postaci i depo na koncie na danym serwerze oraz pokazuje bilans z dzisiaj i z ostatniej godziny. Pomija konta, na których jesteśmy zastępcą.
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
 // @author       Bancewald
@@ -174,6 +174,8 @@
     const PANEL_MIN_WIDTH = 220;
     const PANEL_MIN_HEIGHT = 140;
     const REFRESH_MS = 5000;
+    const MINUTE_MS = 60 * 1000;
+    const HOUR_MS = 60 * MINUTE_MS;
 
     let world = '';
     let panel = null;
@@ -196,7 +198,7 @@
     function loadAccount(account) {
         let data = null;
         try { data = JSON.parse(localStorage.getItem(accountKey(account))); } catch (e) { /* uszkodzony zapis */ }
-        return { chars: (data && data.chars) || {}, depo: (data && data.depo) || null };
+        return { chars: (data && data.chars) || {}, depo: (data && data.depo) || null, history: (data && data.history) || [] };
     }
 
     function saveAccount(account, data) {
@@ -215,6 +217,32 @@
         return Number.isFinite(gold) && gold >= 0 ? gold : null;
     }
 
+    const startOfToday = now => new Date(now).setHours(0, 0, 0, 0);
+
+    // Historia to pary [numer minuty, zmiana złota] w obrębie całego konta, dlatego przelew między postacią a depo się znosi.
+    // Pierwszy odczyt postaci lub depo tylko ustala punkt odniesienia i nie jest zmianą.
+    function addGoldChange(data, change) {
+        if (!change) return;
+        const now = Date.now();
+        const minute = Math.floor(now / MINUTE_MS);
+        const last = data.history[data.history.length - 1];
+        if (last && last[0] === minute) last[1] += change;
+        else data.history.push([minute, change]);
+        const oldest = Math.min(startOfToday(now), now - HOUR_MS);
+        data.history = data.history.filter(([entry]) => entry * MINUTE_MS >= oldest - MINUTE_MS);
+    }
+
+    function goldChanges(data) {
+        const now = Date.now();
+        const dayStart = startOfToday(now);
+        const hourStart = now - HOUR_MS;
+        const sumSince = since => data.history.reduce(
+            (sum, [minute, change]) => (minute * MINUTE_MS >= since ? sum + change : sum),
+            0
+        );
+        return { today: sumSince(dayStart), hour: sumSince(hourStart) };
+    }
+
     function recordHeroGold(value) {
         if (isDeputy()) return;
         const gold = parseGold(value);
@@ -224,6 +252,7 @@
         const previous = data.chars[id];
         if (heroRecorded && previous && previous.gold === gold) return;
         heroRecorded = true;
+        if (previous) addGoldChange(data, gold - previous.gold);
         data.chars[id] = { nick, lvl, gold, at: Date.now() };
         saveAccount(account, data);
         refresh();
@@ -235,6 +264,7 @@
         if (gold === null) return;
         const { account } = hero().d;
         const data = loadAccount(account);
+        if (data.depo) addGoldChange(data, gold - data.depo.gold);
         data.depo = { gold, at: Date.now() };
         saveAccount(account, data);
         refresh();
@@ -288,6 +318,20 @@
         return element;
     }
 
+    function showChange(element, change) {
+        const sign = change > 0 ? '+' : change < 0 ? '−' : '';
+        element.textContent = sign + formatGold(Math.abs(change));
+        element.className = `zl-change-value ${change > 0 ? 'zl-gain' : change < 0 ? 'zl-loss' : ''}`;
+    }
+
+    function createChange(parent, label) {
+        const box = createElement('div', 'zl-change');
+        const value = createElement('div', 'zl-change-value');
+        box.append(createElement('div', 'zl-total-label', label), value);
+        parent.append(box);
+        return value;
+    }
+
     function createRow(name, gold, age, className) {
         const row = createElement('div', `zl-row ${className || ''}`);
         const info = createElement('div', 'zl-row-info');
@@ -324,6 +368,9 @@
         const data = loadAccount(account);
         const { rows, total, missing } = buildSummary(data);
         view.total.textContent = formatGold(total);
+        const changes = goldChanges(data);
+        showChange(view.today, changes.today);
+        showChange(view.hour, changes.hour);
         const warning = missingText(missing, !!data.depo);
         view.missing.hidden = !warning;
         view.missing.textContent = warning;
@@ -378,6 +425,11 @@
             #zl-panel .zl-resize { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 0 45%, #8a7340 45% 55%, transparent 55% 70%, #8a7340 70% 80%, transparent 80%); }
             #zl-panel .zl-total-label { color: #a89a7a; font-size: 11px; }
             #zl-panel .zl-total { color: #f1d58a; font-size: 18px; font-weight: bold; }
+            #zl-panel .zl-changes { display: flex; gap: 6px; }
+            #zl-panel .zl-change { flex: 1 1 0; min-width: 0; padding: 3px 6px; background: #2a2212; border-radius: 3px; }
+            #zl-panel .zl-change-value { color: #e8dcc0; font-weight: bold; overflow-wrap: anywhere; }
+            #zl-panel .zl-change-value.zl-gain { color: #9fe08a; }
+            #zl-panel .zl-change-value.zl-loss { color: #e08a8a; }
             #zl-panel .zl-note { padding: 4px 6px; background: #2a2212; border-radius: 3px; color: #e8c98a; }
             #zl-panel .zl-rows { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 2px; max-height: 300px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #7a6639 #0f0d0a; }
             #zl-panel .zl-row { flex: none; }
@@ -406,11 +458,15 @@
         const total = createElement('div', 'zl-total');
         const totalBox = createElement('div');
         totalBox.append(createElement('div', 'zl-total-label', `Łącznie na serwerze ${world}`), total);
+        const changesBox = createElement('div', 'zl-changes');
+        changesBox.title = 'Zmiana łącznego złota na koncie. Przelewy między postacią a depo się znoszą.';
+        const today = createChange(changesBox, 'Dzisiaj');
+        const hour = createChange(changesBox, 'Ostatnia godzina');
         const missing = createElement('div', 'zl-note');
         // Gra blokuje kółko myszy na całej stronie, z wyjątkiem elementów z klasą unblock-scroll.
         const rows = createElement('div', 'zl-rows unblock-scroll');
         const summary = createElement('div', 'zl-summary');
-        summary.append(totalBox, missing, rows);
+        summary.append(totalBox, changesBox, missing, rows);
         const page = createElement('div', 'zl-page');
         page.append(deputy, summary);
 
@@ -419,7 +475,7 @@
 
         panel.append(head, page, updateInfo.note(), resizeHandle);
         document.body.appendChild(panel);
-        view = { deputy, summary, total, missing, rows };
+        view = { deputy, summary, total, today, hour, missing, rows };
         installDragging(head);
         installResizing(resizeHandle);
         render();
