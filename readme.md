@@ -28,6 +28,8 @@ złoto na koncie - alt + Z
 
 pseudonimy - alt + N
 
+lepszy super sprzedawca - alt + S (albo przycisk "I" obok 1/2/3 w oknie sklepu)
+
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
 aby zainstalować dodatek należy kliknąć na niego, a następnie kliknąć "raw" (w pracym górnym rogu). jeśli mamy Tampermonkey, powinno automatycznie otworzyć się okno instalacji skryptu
@@ -67,6 +69,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 -złoto na koncie - ikonka ZŁ (lub alt + Z) pokazuje łączne złoto wszystkich postaci i depo na danym serwerze. żeby suma była pełna, trzeba raz wejść na każdą postać i otworzyć depo - dodatek pokazuje czego brakuje. dane są zapisane w przeglądarce
 
 -pseudonimy - PPM na graczu (na mapie lub czacie) -> "Dodaj pseudonim", który wyświetla się zamiast nicku w całej grze, dla wszystkich postaci tego konta. lista pseudonimów i ustawienia w menu (ikonka PS lub alt + N). działa tylko po stronie gracza
+
+-lepszy super sprzedawca - poprawki super sprzedawcy (przyciski 1/2/3 w sklepie). lista nazw przedmiotów, których nigdy nie wrzuca do koszyka, nawet gdy spełniają warunki (dodawanie w oknie - przycisk "I" w sklepie lub alt + S - albo PPM na przedmiocie -> "Ignoruj w super sprzedawcy", * w nazwie = dowolny ciąg znaków). dodatkowo pomija przedmioty ulepszone w rzemiośle (+1 do +5) i pokazuje ile przedmiotów pominął. ręczne wrzucanie do koszyka działa jak wcześniej
 
 -lepsze aukcje - grupowanie takich samych ofert w jeden wiersz z najniższą ceną (rozwijane przyciskiem pod nazwą) oraz panel "Ukrywanie i zestawy" w oknie aukcji: ukrywanie ofert po nazwie (też PPM -> "Ukryj na aukcjach"), cenie, poziomie, typie, rzadkości i profesji oraz zapisywanie zestawów filtrów. UWAGA: przy aktualizacji do wersji 2.0 ustawienia ukrywania są czyszczone, bo wcześniej działały odwrotnie
 
