@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Lepsze aukcje
-// @version      2.3
+// @version      2.5
 // @description  Dodatkowe filtry aukcji. Takie same oferty (ten sam przedmiot) są zwijane w jeden wiersz z najniższą ceną, który można rozwinąć. Panel obok okna aukcji: ukrywanie ofert po nazwie, cenie, poziomie, typie aukcji, rzadkości i profesji oraz zapisane zestawy filtrów.
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
@@ -293,15 +293,31 @@
     // Nazwy porównujemy bez wielkości liter i nadmiarowych spacji.
     const normalizeName = name => String(name || '').replace(/\s+/g, ' ').trim().toLowerCase();
     let ignoredSet = new Set(settings.ignored.map(normalizeName));
+    let ignoredMatchers = buildMatchers(ignoredSet);
 
-    // Jak wyszukiwarka gry: wpis ignoruje każdy przedmiot, który ma go gdziekolwiek w nazwie ("skrzynia" -> wszystkie skrzynie).
-    function isIgnoredName(name) {
-        if (!ignoredSet.size) return false;
-        const normalized = normalizeName(name);
-        for (const fragment of ignoredSet) {
-            if (fragment && normalized.includes(fragment)) return true;
+    // Wpis bez gwiazdki ukrywa tylko przedmiot o dokładnie takiej nazwie ("gob" nie ukrywa "Pogobno").
+    // Gwiazdka zastępuje dowolny ciąg znaków: "*gob*" - gob gdziekolwiek w nazwie, "skrzynia*" - nazwy zaczynające się od "skrzynia".
+    function buildMatchers(entries) {
+        const exact = new Set();
+        const patterns = [];
+        for (const entry of entries) {
+            if (!entry) continue;
+            if (!entry.includes('*')) {
+                exact.add(entry);
+                continue;
+            }
+            if (!entry.replace(/\*/g, '').trim()) continue; // sama gwiazdka ukryłaby wszystko
+            const source = entry.split('*').map(part => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+            patterns.push(new RegExp(`^${source}$`));
         }
-        return false;
+        return { exact, patterns };
+    }
+
+    function isIgnoredName(name) {
+        const { exact, patterns } = ignoredMatchers;
+        if (!exact.size && !patterns.length) return false;
+        const normalized = normalizeName(name);
+        return exact.has(normalized) || patterns.some(pattern => pattern.test(normalized));
     }
 
     function addIgnored(name) {
@@ -310,9 +326,33 @@
         setIgnored([...settings.ignored, clean]);
     }
 
+    // Import listy: każda linijka to osobna nazwa, białe znaki na początku i końcu są usuwane, a w środku zwijane do jednej spacji.
+    // Puste linijki, powtórzenia i nazwy już obecne na liście są pomijane.
+    function importIgnored(text) {
+        const list = [...settings.ignored];
+        const known = new Set(ignoredSet);
+        let added = 0;
+        let skipped = 0;
+        for (const line of String(text || '').split(/\r?\n/)) {
+            const clean = line.replace(/\s+/g, ' ').trim();
+            if (!clean) continue;
+            const key = normalizeName(clean);
+            if (known.has(key)) {
+                skipped++;
+                continue;
+            }
+            known.add(key);
+            list.push(clean);
+            added++;
+        }
+        if (added) setIgnored(list);
+        return { added, skipped };
+    }
+
     function setIgnored(list) {
         settings.ignored = list;
         ignoredSet = new Set(list.map(normalizeName));
+        ignoredMatchers = buildMatchers(ignoredSet);
         saveSettings();
         renderIgnoredList();
         refreshOpenButton();
@@ -734,8 +774,17 @@
                     <div class="la-block">
                         <div class="la-title">Ukryj nazwy</div>
                         <div class="la-add">
-                            <input type="text" class="la-input la-ignore-input" placeholder="nazwa lub jej część" maxlength="100" title="Ukrywa każdy przedmiot, który ma ten tekst w nazwie, np. &quot;skrzynia&quot; ukrywa wszystkie skrzynie">
+                            <input type="text" class="la-input la-ignore-input" placeholder="pełna nazwa albo z *" maxlength="100" title="Pełna nazwa ukrywa tylko ten przedmiot.&#10;* zastępuje dowolny tekst:&#10;*gob* - wszystko z &quot;gob&quot; w nazwie&#10;skrzynia* - nazwy zaczynające się od &quot;skrzynia&quot;&#10;*smoka - nazwy kończące się na &quot;smoka&quot;">
                             <div class="la-btn la-ignore-add" title="Dodaj">+</div>
+                        </div>
+                        <div class="la-import-toggle"><span class="la-link">importuj wiele nazw</span></div>
+                        <div class="la-import" style="display: none">
+                            <textarea class="la-input la-import-text" rows="6" placeholder="każda linijka to osobna nazwa"></textarea>
+                            <div class="la-import-actions">
+                                <span class="la-count la-import-result"></span>
+                                <div class="la-small-btn la-import-cancel">anuluj</div>
+                                <div class="la-small-btn la-import-ok">dodaj</div>
+                            </div>
                         </div>
                         <div class="la-count la-ignore-count"></div>
                         <div class="la-list la-ignore-list"></div>
@@ -788,6 +837,30 @@
         };
         isolateKeys(ignoreInput, add);
         el.querySelector('.la-ignore-add').addEventListener('click', add);
+
+        // Import wielu nazw
+        const importBox = el.querySelector('.la-import');
+        const importToggle = el.querySelector('.la-import-toggle');
+        const importText = el.querySelector('.la-import-text');
+        const importResult = el.querySelector('.la-import-result');
+        const showImport = visible => {
+            importBox.style.display = visible ? '' : 'none';
+            importToggle.style.display = visible ? 'none' : '';
+            importResult.textContent = '';
+            if (visible) importText.focus();
+        };
+        isolateKeys(importText); // Enter dodaje tu nową linijkę, a nie zatwierdza
+        importToggle.addEventListener('click', () => showImport(true));
+        el.querySelector('.la-import-cancel').addEventListener('click', () => {
+            importText.value = '';
+            showImport(false);
+        });
+        el.querySelector('.la-import-ok').addEventListener('click', () => {
+            const { added, skipped } = importIgnored(importText.value);
+            if (!added && !skipped) return;
+            importText.value = '';
+            importResult.textContent = `dodano: ${added}${skipped ? `, pominięto powtórzenia: ${skipped}` : ''}`;
+        });
 
         // Przedziały
         const commit = input => {
@@ -1110,6 +1183,20 @@
             .la-empty { color: #888; font-style: italic; line-height: 1.4; }
             .la-count { color: #b9a46a; }
             .la-ignore-count:not(:empty) { margin-top: 5px; }
+            .la-import-toggle { margin-top: 5px; }
+            .la-import { margin-top: 6px; }
+            .la-input.la-import-text {
+                display: block; width: 100%; height: auto; min-height: 80px; padding: 3px 5px;
+                resize: vertical; font-family: inherit; line-height: 1.4;
+            }
+            .la-import-actions { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 4px; }
+            .la-import-result { flex: 1; min-width: 0; }
+            .la-small-btn {
+                padding: 2px 8px; border-radius: 3px; cursor: pointer; user-select: none; line-height: 14px;
+                border: 1px solid #c9a54a; background: rgba(201, 165, 74, 0.25); color: #f0dc9a;
+            }
+            .la-small-btn:hover { background: rgba(201, 165, 74, 0.45); }
+            .la-import-cancel { border-color: #6b5a2e; background: rgba(0, 0, 0, 0.4); color: #bbb; }
             .la-chips { display: flex; flex-wrap: wrap; gap: 5px 4px; }
             .la-chip {
                 padding: 2px 6px; border-radius: 3px; cursor: pointer; user-select: none; line-height: 14px;
