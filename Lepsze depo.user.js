@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lepsze depo
 // @namespace    margonem.depo.swap
-// @version      3.6
+// @version      3.7
 // @description  Dodatkowe funkcje depozytu w margonem (które powinny być 10 lat temu bazowo)
 // @match        https://*.margonem.pl/*
 // @match        https://*.margonem.com/*
@@ -170,6 +170,8 @@
   const PRESET_BUTTON = true;      // przycisk: Ekwipunek + profesja postaci + poziom postaci +- PRESET_LVL_RANGE
   const PRESET_LABEL = 'Dla mnie';
   const PRESET_LVL_RANGE = 20;
+  const TAKE_BUTTON = true;        // przycisk: wyciąga przedmioty z otwartej zakładki (od dołu) do toreb, ile się zmieści
+  const TAKE_LABEL = 'Wyciągnij';
   const QUALITY_FILTER = true;    // dodatkowy filtr jakości przedmiotów w oknie depozytu
   const QUALITY_OPTIONS = [       // pozycje menu filtra jakości (val = wartość statystyki "rarity")
     { text: 'Jakość', val: 0 },
@@ -767,6 +769,70 @@
     }
   }
 
+  /* ---------- wyciąganie zawartości zakładki do toreb ---------- */
+  // Wolne miejsca w torbach według gry (ta sama liczba co "X m" przy ekwipunku); null, gdy nie da się odczytać
+  function bagFreeSlots() {
+    try {
+      const n = Number(Engine.heroEquipment.getFreeSlots());
+      return isNaN(n) ? null : n;
+    } catch (e) { return null; }
+  }
+
+  // Przedmioty otwartej zakładki depozytu od dołu do góry (w wierszu od prawej do lewej); null, gdy nie da się jej odczytać
+  function openTabItems() {
+    const d = depoWnd();
+    if (!d) return null;
+    let r;
+    try { r = d.getDepoOpenTabs().getSlotsDataToFindFirstFreeSlot(d.getVisible()); } catch (e) { return null; }
+    if (!r) return null;
+    return getDepoItems().filter(i => {
+      const x = Number(i.x), y = Number(i.y);
+      return x >= r.xStart && x < r.xEnd && y >= r.yStart && y < r.yEnd;
+    }).sort((a, b) => Number(b.y) - Number(a.y) || Number(b.x) - Number(a.x));
+  }
+
+  async function takeTabToBags() {
+    if (bulkRunning || swapping) { notify('Trwa inna operacja - spróbuj za chwilę.'); return; }
+    if (!privateDepoOpen()) { notify('Najpierw otwórz depozyt (prywatny).'); return; }
+    const items = openTabItems();
+    if (!items) { notify('Nie udało się odczytać otwartej zakładki depozytu.'); return; }
+    if (!items.length) { notify('Otwarta zakładka depozytu jest pusta.'); return; }
+    if (bagFreeSlots() === 0) { notify('Brak miejsca w torbach.'); return; }
+
+    bulkRunning = true;
+    try {
+      // Kilka podejść: przedmiot stackowalny może dołączyć do stacka w torbie i nie zająć miejsca,
+      // więc po każdej serii liczymy wolne miejsca od nowa.
+      let stop = false;
+      for (let pass = 0; pass < 5 && !stop; pass++) {
+        const pending = items.filter(i => inDepo(i.id));
+        if (!pending.length) break;
+        const free = bagFreeSlots();
+        if (free !== null && free <= 0) break;
+        // bez odczytu wolnych miejsc: pojedynczo, aż serwer odmówi
+        const jobs = free === null ? pending : pending.slice(0, free);
+        let got = 0;
+        await Promise.all(Array.from({ length: free === null ? 1 : BULK_PARALLEL }, async () => {
+          while (jobs.length && !stop) {
+            if (!privateDepoOpen()) { stop = true; break; }   // depozyt zamknięty w trakcie - przerywamy
+            const it = jobs.shift();
+            if (await sendAndWait(fill(CMD_TO_BAG, it.id), () => !inDepo(it.id), 1500)) got++;
+            else if (free === null) stop = true;
+          }
+        }));
+        if (!got) break;
+      }
+
+      const left = items.filter(i => inDepo(i.id)).length;
+      notify('Wyciągnięto ' + (items.length - left) + '/' + items.length + ' przedmiotów z zakładki' +
+        (left ? (bagFreeSlots() === 0 ? ' - brak miejsca w torbach.' : '.') : '.'));
+    } catch (e) {
+      log('błąd wyciągania zakładki', e);
+    } finally {
+      bulkRunning = false;
+    }
+  }
+
   /* ---------- przycisk w menu kontekstowym torby ---------- */
   function setLabel(el, label) {
     const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -1300,21 +1366,21 @@
   }
 
   // przycisk o wyglądzie zielonych przycisków okna depozytu (kopia "Pay in" itp.)
-  function buildPresetButton(d, onClick) {
+  function buildDepoButton(d, label, onClick) {
     let btn = null;
     try {
-      const src = Array.from(d.wnd.$.find('.button.green')).find(b => b.offsetParent !== null) ||
-                  Array.from(d.wnd.$.find('.button')).find(b => b.offsetParent !== null);
+      const src = Array.from(d.wnd.$.find('.button.green')).find(b => b.offsetParent !== null && !b.hasAttribute('data-deposwap-preset')) ||
+                  Array.from(d.wnd.$.find('.button')).find(b => b.offsetParent !== null && !b.hasAttribute('data-deposwap-preset'));
       if (src) {
         btn = src.cloneNode(true);
         btn.removeAttribute('id');
         const lab = btn.querySelector('.label');
-        if (lab) lab.textContent = PRESET_LABEL; else btn.textContent = PRESET_LABEL;
+        if (lab) lab.textContent = label; else btn.textContent = label;
       }
     } catch (e) {}
     if (!btn) {
       btn = document.createElement('div');
-      btn.textContent = PRESET_LABEL;
+      btn.textContent = label;
       imp(btn, { padding: '3px 10px', background: '#2d5a1f', color: '#fff', border: '1px solid #7fb05a',
                  'border-radius': '4px', 'font-size': '12px' });
     }
@@ -1463,13 +1529,24 @@
     let presetEl = null;
     if (PRESET_BUTTON) {
       try {
-        presetEl = buildPresetButton(d, () => applyPreset(d));
+        presetEl = buildDepoButton(d, PRESET_LABEL, () => applyPreset(d));
         if (qEl && qEl.parentElement === section[0]) section[0].insertBefore(presetEl, qEl.nextSibling);
         else section[0].appendChild(presetEl);
       } catch (e) { log('błąd tworzenia przycisku "' + PRESET_LABEL + '"', e); presetEl = null; }
     }
 
-    growWindowForRow(section, chain, [qEl, presetEl]);
+    let takeEl = null;
+    if (TAKE_BUTTON) {
+      try {
+        takeEl = buildDepoButton(d, TAKE_LABEL, () => takeTabToBags());
+        takeEl.title = 'Wyciąga przedmioty z otwartej zakładki do toreb - od dołu, tyle ile się zmieści';
+        const after = presetEl || qEl;
+        if (after && after.parentElement === section[0]) section[0].insertBefore(takeEl, after.nextSibling);
+        else section[0].appendChild(takeEl);
+      } catch (e) { log('błąd tworzenia przycisku "' + TAKE_LABEL + '"', e); takeEl = null; }
+    }
+
+    growWindowForRow(section, chain, [qEl, presetEl, takeEl]);
     log('dodano filtry depozytu: jakość' + (presetEl ? ' + "' + PRESET_LABEL + '"' : ''));
   }
 

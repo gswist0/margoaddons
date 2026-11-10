@@ -84,6 +84,7 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
     -zamiana miejscami przedmiotow w depo tak samo jak można to robić w eq (WYMAGA 1 WOLNEGO MIEJSCA W DEPO / EQ GRACZA)
     -automatyczne stackowanie itemów gdy wrzucamy je 1 klikiem (gdy przeciągamy to wpadnie tam gdzie chcemy)
     -wrzucanie całej torby (prawy klik na torbę - przy otwartym depo pojawia się nowa opcja w menu kontekstowym - Wrzuć zawartość do depozytu)
+    -wyciąganie przedmiotów z otwartej zakładki do toreb (przycisk Wyciągnij - od dołu, tyle ile zmieści się w torbach)
     -nowe opcje filtrowania
 
 # skąd wziąć link do webhooka do discordowych dodatków
