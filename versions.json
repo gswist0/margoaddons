@@ -34,6 +34,11 @@
     "version": "3.6",
     "file": "Lepsze depo.user.js"
   },
+  "lepszy-super-rzemieslnik": {
+    "name": "Lepszy super rzemieślnik",
+    "version": "1.0",
+    "file": "Lepszy super rzemieślnik.user.js"
+  },
   "lepszy-super-sprzedawca": {
     "name": "Lepszy super sprzedawca",
     "version": "1.0",

@@ -28,7 +28,9 @@ złoto na koncie - alt + Z
 
 pseudonimy - alt + N
 
-lepszy super sprzedawca - alt + S (albo przycisk "I" obok 1/2/3 w oknie sklepu)
+lepszy super sprzedawca - alt + S (albo przycisk "z kłódką" obok 1/2/3 w oknie sklepu)
+
+lepszy super rzemieślnik - alt + K (albo przycisk z kłódką obok 1/2/3 w oknie ulepszania)
 
 
 do poprawnego działania potrzebny jest dodatek do przeglądarki Tampermonkey
@@ -71,6 +73,8 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 -pseudonimy - PPM na graczu (na mapie lub czacie) -> "Dodaj pseudonim", który wyświetla się zamiast nicku w całej grze, dla wszystkich postaci tego konta. lista pseudonimów i ustawienia w menu (ikonka PS lub alt + N). działa tylko po stronie gracza
 
 -lepszy super sprzedawca - poprawki super sprzedawcy (przyciski 1/2/3 w sklepie). lista nazw przedmiotów, których nigdy nie wrzuca do koszyka, nawet gdy spełniają warunki (dodawanie w oknie - przycisk "I" w sklepie lub alt + S - albo PPM na przedmiocie -> "Ignoruj w super sprzedawcy", * w nazwie = dowolny ciąg znaków). dodatkowo pomija przedmioty ulepszone w rzemiośle (+1 do +5) i pokazuje ile przedmiotów pominął. ręczne wrzucanie do koszyka działa jak wcześniej
+
+-lepszy super rzemieślnik - poprawki super rzemieślnika (przyciski 1/2/3 w oknie ulepszania). w oknie (przycisk z kłódką obok 1/2/3 lub alt + K) można włączyć dodawanie unikatów i heroików, wybrać tylko niezwiązane / tylko związane / wszystkie, pomijać przedmioty z jakimkolwiek ulepszeniem (+1 do +5, też częściowo ulepszone) i przedmioty z licytacji (z przekuwaniem) oraz brać tylko przedmioty z tej samej grupy co ulepszany - bronie, zbroje lub biżuteria, jak w grze (premia +25%). lista nazw przedmiotów, których nigdy nie używa (PPM na przedmiocie -> "Ignoruj w super rzemieślniku", * w nazwie = dowolny ciąg znaków). ręczne dodawanie działa jak wcześniej
 
 -lepsze aukcje - grupowanie takich samych ofert w jeden wiersz z najniższą ceną (rozwijane przyciskiem pod nazwą) oraz panel "Ukrywanie i zestawy" w oknie aukcji: ukrywanie ofert po nazwie (też PPM -> "Ukryj na aukcjach"), cenie, poziomie, typie, rzadkości i profesji oraz zapisywanie zestawów filtrów. UWAGA: przy aktualizacji do wersji 2.0 ustawienia ukrywania są czyszczone, bo wcześniej działały odwrotnie
 
