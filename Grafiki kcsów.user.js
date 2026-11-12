@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Grafiki kcsów
-// @version      1.9
-// @description  Zamienia grafikę kamieni czerwonego smoka ustawionych na mapę z e2 (lub najbliższą jej dostępną) albo przedsionek tytana/kolosa na grafikę tego potwora
+// @version      2.0
+// @description  Zamienia grafikę kamieni czerwonego smoka (i opcjonalnie zwykłych kamieni teleportujących) prowadzących na mapę z e2 (lub najbliższą jej dostępną) albo przedsionek tytana/kolosa na grafikę tego potwora
 // @match        https://*.margonem.pl/
 // @author       Bancewald
 // @grant        none
@@ -307,11 +307,13 @@
     const PANEL_POSITION_KEY = 'grafiki_kcs_pozycja';
     const GRAPHICS_KEY = 'grafiki_kcs_grafiki';
     const LABELS_KEY = 'grafiki_kcs_tekst';
+    const NORMAL_STONES_KEY = 'grafiki_kcs_zwykle_kamienie';
     const CUSTOM_KEY = 'grafiki_kcs_wlasne';
     const CUSTOM_LABEL_MAX_LENGTH = 12;
 
     let showGraphics = localStorage.getItem(GRAPHICS_KEY) !== 'false';
     let showLabels = localStorage.getItem(LABELS_KEY) === 'true';
+    let changeNormalStones = localStorage.getItem(NORMAL_STONES_KEY) === 'true';
 
     /* ================== ROZPOZNAWANIE MAPY ================== */
 
@@ -360,15 +362,22 @@
     // teleport=632,7,79,Las Tropicieli
     const TARGET_STAT = /^\d+,\d+,\d+,(.+)$/;
 
-    const isStone = (item, stats) => 'custom_teleport' in stats || /czerwonego smoka/i.test(item.name || '');
+    // 'kcs': kamień czerwonego smoka, 'normal': zwykły kamień teleportujący z mapą na stałe, null: inny przedmiot
+    function stoneKind(item, stats) {
+        if ('custom_teleport' in stats || /czerwonego smoka/i.test(item.name || '')) return 'kcs';
+        if ('teleport' in stats) return 'normal';
+        return null;
+    }
 
-    // Mapa, na którą ustawiony jest kamień, i to, co jest dla niej zdefiniowane. null: kamień nie jest ustawiony.
+    // Mapa, na którą prowadzi kamień, i to, co jest dla niej zdefiniowane. null: kamień nie jest ustawiony.
     function findTarget(item) {
         const stats = item.parseStats();
-        if (!isStone(item, stats)) return null;
+        const kind = stoneKind(item, stats);
+        if (!kind) return null;
 
         const describe = map => ({
             map,
+            kind,
             boss: BOSS_BY_NORMALIZED_MAP.get(normalize(map)) || null,
             custom: customSettings.get(normalize(map)) || null,
         });
@@ -378,7 +387,9 @@
             if (target) return describe(target[1]);
         }
 
-        // brak celu w znanym formacie: nazwa mapy może być w dowolnej innej części statystyk (np. w opisie)
+        // Brak celu w znanym formacie: nazwa mapy może być w dowolnej innej części statystyk (np. w opisie).
+        // Tylko dla KCS, bo opis zwykłego kamienia może wspominać inne mapy niż ta, na którą prowadzi.
+        if (kind !== 'kcs') return null;
         const found = [...customPatterns, ...MAP_PATTERNS].find(({ pattern }) => pattern.test(item.stat || ''));
         return found ? describe(found.map) : null;
     }
@@ -490,11 +501,12 @@
     });
 
     // Co pokazać na kamieniu. null oznacza zwykłą ikonę z gry.
-    // Własne ustawienia są zawsze widoczne, a opcje w menu dotyczą tylko grafik i tekstów wbudowanych.
+    // Własne ustawienia są zawsze widoczne, na każdym kamieniu, a opcje w menu dotyczą tylko grafik i tekstów wbudowanych.
     function chooseIcon(item) {
         const target = findTarget(item);
         if (!target) return null;
-        const { boss, custom } = target;
+        const { custom } = target;
+        const boss = target.kind === 'kcs' || changeNormalStones ? target.boss : null;
         if (!boss && !custom) return null;
 
         const label = (custom && custom.label) || (showLabels && boss ? boss.label : '');
@@ -526,7 +538,7 @@
     const itemSyncs = new Set();
 
     function hookItem(item) {
-        if (hookedItems.has(item) || !isStone(item, item.parseStats())) return;
+        if (hookedItems.has(item) || !stoneKind(item, item.parseStats())) return;
         hookedItems.add(item);
 
         const showIcon = item.afterOnloadItem;
@@ -831,8 +843,13 @@
             localStorage.setItem(LABELS_KEY, showLabels);
             refreshItems();
         });
+        const normalStonesRow = createCheckbox('kcs-normal-stones', 'Zmieniaj też zwykłe kamienie teleportujące', changeNormalStones, checked => {
+            changeNormalStones = checked;
+            localStorage.setItem(NORMAL_STONES_KEY, changeNormalStones);
+            refreshItems();
+        });
 
-        page.append(graphicsRow, labelsRow, buildCustomSection());
+        page.append(graphicsRow, labelsRow, normalStonesRow, buildCustomSection());
         panel.append(head, page, updateInfo.note());
         document.body.appendChild(panel);
         installDragging(head);

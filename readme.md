@@ -64,7 +64,7 @@ kontakt na discord: poteznydominator NIE TRZEBA DODAWAC MNIE DO ZNAJOMYCH MOZNA 
 
 -agresywność potworów - ikonka AG (lub alt + C) włącza/wyłącza agresywność potworów w pojedynkę z konfiguracji gry. podświetlona ikonka oznacza że opcja jest włączona. nie zmienia opcji agresywności w grupie
 
--grafiki e2 na kcs - kamienie czerwonego smoka dostają grafikę e2 (lub tytana/kolosa) z mapy, na którą prowadzą. w menu (ikonka KC lub alt + V) można włączyć krótką nazwę potwora na kamieniu i ustawić własną grafikę/tekst (też przez PPM na kamień). działa tylko po stronie gracza
+-grafiki e2 na kcs - kamienie czerwonego smoka dostają grafikę e2 (lub tytana/kolosa) z mapy, na którą prowadzą. w menu (ikonka KC lub alt + V) można włączyć krótką nazwę potwora na kamieniu i ustawić własną grafikę/tekst dla dowolnej lokacji (też przez PPM na dowolny kamień teleportujący, nie tylko kcs). opcja "zmieniaj też zwykłe kamienie teleportujące" (domyślnie wyłączona) podmienia też grafikę zwykłych kamieni prowadzących na takie mapy. działa tylko po stronie gracza
 
 -ulepszanie przedmiotów - przeciągamy przedmiot na ikonkę UL (lub alt + U), a dodatek automatycznie ulepsza go łupami do ustawionej w menu jakości. legendy, artefakty, ulepszone przedmioty i rzeczy spoza łupów nigdy nie są zużywane. poziom ulepszenia podnosimy sami - dodatek wtedy czeka i informuje gracza
 
