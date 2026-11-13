@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lepszy super rzemieślnik
-// @version      1.0
-// @description  Poprawki super rzemieślnika w ulepszaniu (przyciski 1/2/3): dodawanie unikatów i heroików, wybór związanych/niezwiązanych, lista nazw przedmiotów, których nigdy nie używa (też PPM na przedmiocie), pomijanie przedmiotów ulepszonych i z licytacji oraz opcja "tylko ta sama grupa przedmiotów" (+25% punktów).
+// @version      1.1
+// @description  Poprawki super rzemieślnika w ulepszaniu (przyciski 1/2/3): dodawanie unikatów i heroików, wybór związanych/niezwiązanych, lista nazw przedmiotów, których nigdy nie używa (też PPM na przedmiocie), dodawanie przedmiotów ulepszających (np. Odłamany klejnot) z kontrolą ich wymagań, pomijanie przedmiotów ulepszonych i z licytacji oraz opcja "tylko ta sama grupa przedmiotów" (+25% punktów).
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
 // @author       Bancewald
@@ -191,6 +191,7 @@
         skipEnhanced: true,   // pomijaj przedmioty z jakimkolwiek ulepszeniem (+1 ... +5)
         skipReforge: true,    // pomijaj przedmioty z licytacji (mają przekuwanie)
         sameClass: false,     // tylko przedmioty tego samego typu co ulepszany (premia +25%)
+        addStones: true,      // dorzucaj przedmioty ulepszające (np. Odłamany klejnot)
         report: false,        // komunikat ile przedmiotów pominięto
         panel: { left: null, top: null },
     };
@@ -215,6 +216,7 @@
             skipEnhanced: flag('skipEnhanced'),
             skipReforge: flag('skipReforge'),
             sameClass: flag('sameClass'),
+            addStones: flag('addStones'),
             report: flag('report'),
             panel: { ...DEFAULT_SETTINGS.panel, ...(saved.panel || {}) },
         };
@@ -318,6 +320,71 @@
         return !!stats && REFORGE_STATS.some(key => key in stats);
     }
 
+    /* ---- przedmioty ulepszające (np. Odłamany klejnot) ---- */
+
+    const STONE_STATS = ['enhancement_add', 'enhancement_add_point'];
+    // Wymagania kamienia wobec ulepszanego przedmiotu, które umiemy sprawdzić. Każdy inny target_*
+    // to warunek, którego nie znamy - taki kamień pomijamy, żeby nie zgadywać.
+    const STONE_KNOWN_TARGET = ['target_rarity', 'target_class', 'target_min_lvl', 'target_max_lvl'];
+    const warnedStats = new Set();
+
+    const statsOf = item => {
+        try { return item.parseStats() || {}; } catch (e) { return {}; }
+    };
+    const isStone = item => {
+        const stats = statsOf(item);
+        return STONE_STATS.some(key => key in stats);
+    };
+
+    // Dlaczego kamień nie pasuje do ulepszanego przedmiotu (null = pasuje).
+    function stoneSkipReason(stone, target) {
+        if (stone.name && isNameIgnored(stone.name)) return 'name';
+        const stats = statsOf(stone);
+        if ('cursed' in stats) return 'stoneReq';
+        const targetStats = statsOf(target);
+        // ranga - tak samo jak sprawdza gra (Enchant.isCorrectReagent)
+        if ('target_rarity' in stats && stats.target_rarity !== target.itemTypeName) return 'stoneReq';
+        // typ, np. target_class=8 = tylko zbroje (na wszelki wypadek obsługujemy też listę "8,9")
+        if ('target_class' in stats) {
+            const classes = String(stats.target_class).split(',').map(Number);
+            if (!classes.includes(Number(target.cl))) return 'stoneReq';
+        }
+        const lvl = Number(targetStats.lvl) || 0;
+        if ('target_min_lvl' in stats && lvl < Number(stats.target_min_lvl)) return 'stoneReq';
+        if ('target_max_lvl' in stats && lvl > Number(stats.target_max_lvl)) return 'stoneReq';
+        const unknown = Object.keys(stats).filter(key => key.startsWith('target_') && !STONE_KNOWN_TARGET.includes(key));
+        if (unknown.length) {
+            const key = `${stone.name}|${unknown.join(',')}`;
+            if (!warnedStats.has(key)) {
+                warnedStats.add(key);
+                console.warn(LOG, `pomijam "${stone.name}" - nieznane wymaganie: ${unknown.join(', ')}`, stone.stat);
+            }
+            return 'stoneReq';
+        }
+        return null;
+    }
+
+    // Kamienie z klikniętej torby, pasujące do ulepszanego przedmiotu. Torbę sprawdza ItemGrabber gry,
+    // tak samo jak dla zwykłych przedmiotów (torba N = wiersze (N-1)*6 ... N*6-1).
+    const inBag = (grabber, item, bagNumber) => {
+        if (Number(item.st) !== 0) return false;
+        if (typeof grabber.checkBagCondition === 'function') return grabber.checkBagCondition(item, bagNumber);
+        return !bagNumber || (item.y >= (bagNumber - 1) * 6 && item.y < bagNumber * 6);
+    };
+
+    function grabStones(target, skipped, grabber, bagNumber) {
+        if (!settings.addStones || !target) return [];
+        const Engine = window.Engine;
+        const items = Engine.heroEquipment && Engine.heroEquipment.getHItems ? Engine.heroEquipment.getHItems() : {};
+        return Object.values(items).filter(item => {
+            if (!item || item.id === target.id || !isStone(item) || !inBag(grabber, item, bagNumber)) return false;
+            let reason = null;
+            try { reason = stoneSkipReason(item, target); } catch (e) { console.warn(LOG, 'błąd filtra kamieni', e); reason = 'stoneReq'; }
+            if (reason) skipped[reason]++;
+            return !reason;
+        });
+    }
+
     // Dlaczego przedmiot nie powinien trafić do ulepszania (null = gra może go użyć).
     function skipReason(item, target) {
         if (!item) return null;
@@ -360,7 +427,7 @@
         if (!grabber || autofiller.__lsrPatched || typeof grabber.grab !== 'function') return;
         autofiller.__lsrPatched = true;
         const grab = grabber.grab;
-        grabber.grab = function () {
+        grabber.grab = function (params) {
             const original = this.options;
             let patched = original;
             try { patched = buildGrabberOptions(original || {}); } catch (e) { console.warn(LOG, 'błąd ustawień filtra', e); }
@@ -374,18 +441,24 @@
             if (!Array.isArray(items)) return items;
 
             const target = enhancedTarget();
-            const skipped = { name: 0, reforge: 0, enhanced: 0, otherClass: 0 };
-            const result = items.filter(item => {
+            const skipped = { name: 0, reforge: 0, enhanced: 0, otherClass: 0, stoneReq: 0 };
+            const filtered = items.filter(item => {
                 let reason = null;
                 try { reason = skipReason(item, target); } catch (e) { console.warn(LOG, 'błąd filtra', e); }
                 if (reason) skipped[reason]++;
                 return !reason;
             });
+            // kamienie na początek, żeby zmieściły się w limicie 25 składników
+            let stones = [];
+            try { stones = grabStones(target, skipped, this, params && params.bagNumber); } catch (e) { console.warn(LOG, 'błąd kamieni', e); }
+            const stoneIds = new Set(stones.map(item => item.id));
+            const result = [...stones, ...filtered.filter(item => !stoneIds.has(item.id))];
             const parts = [];
             if (skipped.name) parts.push(`${skipped.name} z listy ignorowanych`);
             if (skipped.reforge) parts.push(`${skipped.reforge} z licytacji`);
             if (skipped.enhanced) parts.push(`${skipped.enhanced} ulepszonych`);
             if (skipped.otherClass) parts.push(`${skipped.otherClass} z innej grupy`);
+            if (skipped.stoneReq) parts.push(`${skipped.stoneReq} kamieni (wymagania)`);
             if (settings.report && parts.length) notify(`Super rzemieślnik pominął: ${parts.join(', ')}`);
             return result;
         };
@@ -614,6 +687,10 @@
             'Grupy jak w grze: bronie (z kołczanami), zbroje (zbroje, hełmy, buty, rękawice, tarcze), biżuteria (pierścienie, naszyjniki)');
         const report = flagCheckbox('Pokazuj ile przedmiotów pominięto', 'report');
 
+        const stonesSection = el('div', 'lsr-section', 'Przedmioty ulepszające');
+        const stones = flagCheckbox('Dodawaj przedmioty ulepszające (np. Odłamany klejnot)', 'addStones',
+            'Z klikniętej torby, tylko te, których wymagania (ranga, typ, poziom) spełnia ulepszany przedmiot. Trafiają do okna jako pierwsze');
+
         // --- lista ignorowanych ---
         const listSection = el('div', 'lsr-section', 'Nigdy nie używaj');
         const info = el('div', 'lsr-info',
@@ -650,6 +727,7 @@
             + 'Gra wciąż pyta o potwierdzenie przy przedmiotach lepszej rzadkości, ulepszonych i osobistych.');
 
         body.append(raritySection, rarityRow, rarityWarnEl, boundSection, boundSelect, optionsSection, reforge, enhanced, sameClass, report,
+            stonesSection, stones,
             listSection, info, add, listEl, foot, gameInfo, updateInfo.note());
         panel.append(head, body);
         document.body.appendChild(panel);
