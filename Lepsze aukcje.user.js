@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Lepsze aukcje
-// @version      2.5
+// @version      2.6
 // @description  Dodatkowe filtry aukcji. Takie same oferty (ten sam przedmiot) są zwijane w jeden wiersz z najniższą ceną, który można rozwinąć. Panel obok okna aukcji: ukrywanie ofert po nazwie, cenie, poziomie, typie aukcji, rzadkości i profesji oraz zapisane zestawy filtrów.
 // @match        https://*.margonem.pl/
 // @match        https://*.margonem.com/
@@ -383,7 +383,8 @@
             table: null,
             observer: null,
             scheduled: false,
-            requestedPage: null,
+            loadMoreTimer: null,
+            lastPageRequest: null, // { page, at } - ostatnia prośba o kolejną stronę (gra lub dodatek)
         };
     }
 
@@ -418,7 +419,7 @@
             s.seq.clear();
             s.nextSeq = 0;
             s.firstSeq = 0;
-            s.requestedPage = null;
+            s.lastPageRequest = null;
         }
         const list = [];
         if (data.show && Array.isArray(data.show.offers)) list.push(...data.show.offers);
@@ -487,6 +488,7 @@
             s.observer = new MutationObserver(() => schedule(s));
             s.observer.observe(table, { childList: true, subtree: true });
         }
+        hookPages(s);
         addControls(content[0]);
         if (settings.panelOpen) showPanel();
     }
@@ -590,8 +592,14 @@
         for (const { entry, role, group } of order) decorate(s, entry, role, group);
 
         if (s.observer) s.observer.takeRecords(); // własne zmiany nie wywołują ponownego grupowania
-        s.manager.getAuctionWindow().updateScroll();
-        loadMoreIfShort(s);
+        // Starsze wersje gry trzeba było poprosić o przeliczenie paska przewijania; nowy ScrollBar (11.2026) robi to sam.
+        const auctionWindow = s.manager.getAuctionWindow();
+        if (typeof auctionWindow.updateScroll === 'function') auctionWindow.updateScroll();
+        // Sprawdzamy po odświeżeniu paska przez grę (robi to w następnej klatce).
+        clearTimeout(s.loadMoreTimer);
+        s.loadMoreTimer = setTimeout(() => {
+            if (session === s) loadMoreIfNeeded(s);
+        }, 150);
     }
 
     function decorate(s, entry, role, group) {
@@ -628,17 +636,39 @@
         badge.title = `${group.list.length} takich samych ofert\nnajtaniej: ${formatPrice(entry.price)}\nnajdrożej: ${formatPrice(max)}\n\nkliknij, aby ${expanded ? 'zwinąć' : 'rozwinąć'}`;
     }
 
-    // Gdy po zwinięciu lista jest za krótka, żeby ją przewinąć, gra nie wczyta kolejnej strony - robimy to za nią, raz na stronę.
-    function loadMoreIfShort(s) {
-        const wrapper = s.table.closest('.scroll-wrapper');
-        if (!wrapper) return;
+    // Gra prosi o kolejną stronę tylko w chwili dojścia paska do dołu. Gdy po ukryciu wierszy lista jest za krótka do przewinięcia
+    // albo nadal stoi na samym dole (nowa strona prawie cała ukryta), gra już nie poprosi - robimy to za nią.
+    const BOTTOM_MARGIN = 40;
+
+    function loadMoreIfNeeded(s) {
+        if (!s.table || !s.table.isConnected) return;
         const pages = s.manager.getAuctionPages();
         const page = pages.getCurrentPage();
         const max = pages.getMaxPage();
-        if (page === null || max === null || page >= max || s.requestedPage === page) return;
-        if (s.table.offsetHeight > wrapper.clientHeight) return;
-        s.requestedPage = page;
-        pages.getNextPageAction();
+        if (page === null || max === null || page >= max) return;
+        const pane = s.table.closest('.scroll-pane');
+        const wrapper = s.table.closest('.scroll-wrapper');
+        let nearBottom;
+        if (pane && pane.clientHeight > 0) nearBottom = pane.scrollHeight - pane.clientHeight - pane.scrollTop <= BOTTOM_MARGIN;
+        else if (wrapper) nearBottom = s.table.offsetHeight <= wrapper.clientHeight;
+        else return;
+        if (nearBottom) pages.getNextPageAction();
+    }
+
+    // Jedna prośba o daną stronę naraz - niezależnie, czy prosi gra (przewinięcie), czy dodatek.
+    // Gdy odpowiedź nie przyjdzie w ciągu 3 s, można poprosić ponownie.
+    function hookPages(s) {
+        const pages = s.manager.getAuctionPages();
+        if (!pages || pages.__lepszeAukcje || typeof pages.getNextPageAction !== 'function') return;
+        const original = pages.getNextPageAction;
+        pages.getNextPageAction = function () {
+            const page = pages.getCurrentPage();
+            const last = s.lastPageRequest;
+            if (last && last.page === page && Date.now() - last.at < 3000) return undefined;
+            s.lastPageRequest = { page, at: Date.now() };
+            return original.apply(this, arguments);
+        };
+        pages.__lepszeAukcje = true;
     }
 
     /* ================== LEWA KOLUMNA OKNA AUKCJI ================== */
