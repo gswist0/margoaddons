@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Oddaj D
-// @version      1.1
+// @version      1.2
 // @author       Bancewald
 // @match        *.margonem.pl/
 // @grant        none
@@ -155,17 +155,22 @@
 
     let loadtime = Date.now()
 
-    function check_party(nick) { //zmienic na nick?
-        if (!Engine.party)
+    // Od aktualizacji 11.2026 getMembers() zwraca Map członków z polem leader (nie ma już getLeaderId),
+    // a bez grupy zwraca undefined. Starsza wersja gry: obiekt członków + getLeaderId().
+    function check_party(nick) {
+        const party = Engine.party
+        const members = party && typeof party.getMembers === 'function' && party.getMembers()
+        if (!members)
             return -1
-        if (Engine.party.getLeaderId() != Engine.hero.d.id)
+        const list = members instanceof Map ? Array.from(members.values()) : Object.values(members)
+        const heroId = Engine.hero.d.id
+        const isLeader = typeof party.getLeaderId === 'function'
+            ? party.getLeaderId() == heroId
+            : list.some(player => player.id == heroId && player.leader)
+        if (!isLeader)
             return -1
-        for (let i = 0; i < Object.keys(Engine.party.getMembers()).length; i++) {
-            let player = Object.values(Engine.party.getMembers())[i]
-            if (player.nick == nick) 
-                return player.id
-        }
-        return -1
+        const player = list.find(player => player.nick == nick)
+        return player ? player.id : -1
     }
 
     function parsowanko(msg){
